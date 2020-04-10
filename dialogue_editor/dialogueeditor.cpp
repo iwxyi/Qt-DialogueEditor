@@ -56,7 +56,7 @@ void DialogueEditor::initView()
     });
     connect(style_edit, &QPlainTextEdit::textChanged, this, [=]{
        if (!current_bucket)
-           return
+           return ;
        current_bucket->setStyleSheet(style_edit->toPlainText());
     });
     connect(name_check, &QCheckBox::stateChanged, this, [=](int){

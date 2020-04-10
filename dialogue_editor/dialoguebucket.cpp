@@ -23,7 +23,7 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     QVBoxLayout* vlayout = new QVBoxLayout;
     QVBoxLayout* alayout = new QVBoxLayout;
     avatar = new DialogueAvatar(ava, this);
-    figure = new DialogueFigure(name, this);
+    figure = new DialogueNickname(name, this);
     bubble = new DialogueBubble(said, this);
 
     alayout->addWidget(avatar);

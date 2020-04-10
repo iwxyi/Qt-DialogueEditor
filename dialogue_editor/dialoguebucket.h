@@ -12,7 +12,7 @@
 #include <QFile>
 #include <QTextStream>
 #include "dialogueavatar.h"
-#include "dialoguefigure.h"
+#include "dialoguenickname.h"
 #include "dialoguebubble.h"
 #include "dialoguenarrator.h"
 
@@ -49,7 +49,7 @@ public slots:
 private:
     ChatType type = SelfChat;
 
-    DialogueFigure *figure = nullptr; // 姓名
+    DialogueNickname *figure = nullptr; // 姓名
     DialogueAvatar *avatar = nullptr; // 头像
     DialogueBubble *bubble = nullptr; // 气泡
     DialogueNarrator *narrator = nullptr; // 旁白

@@ -1,18 +1,25 @@
-/**
-  * 剧本 人名控件
-  */
-
 #ifndef DIALOGUEFIGURE_H
 #define DIALOGUEFIGURE_H
 
 #include <QObject>
-#include <QLabel>
+#include <QPixmap>
+#include <QStringList>
 
-class DialogueFigure : public QLabel
+class DialogueFigure : public QObject
 {
+    Q_OBJECT
 public:
-    DialogueFigure(QWidget *parent = nullptr);
-    DialogueFigure(QString name, QWidget *parent = nullptr);
+    explicit DialogueFigure(QObject *parent = nullptr);
+
+signals:
+
+public slots:
+
+private:
+    bool is_self = false; // 是否在右边
+    QString nickname;
+    QPixmap avatar;
+    QString avatar_qss, chat_qss; // 样式表
 };
 
 #endif // DIALOGUEFIGURE_H
