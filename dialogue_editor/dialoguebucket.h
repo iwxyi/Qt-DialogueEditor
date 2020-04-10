@@ -23,6 +23,7 @@ enum ChatType {
 class DialogueBucket : public QWidget
 {
     Q_OBJECT
+    friend class DialogueEditor;
 public:
     DialogueBucket(ChatType type, QString name, QPixmap avatar, QString said, QWidget *parent = nullptr);
     DialogueBucket(QString narr, QWidget *parent = nullptr);

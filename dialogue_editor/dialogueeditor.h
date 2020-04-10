@@ -1,16 +1,15 @@
 /**
-  * 剧本 对话编辑器
-  * 带 widgets、actions
-  */
+ * 剧本 bucket 编辑器类
+ */
 
-#ifndef DIALOGUEDITOR_H
-#define DIALOGUEDITOR_H
+#ifndef DIALOGUEEDITOR_H
+#define DIALOGUEEDITOR_H
 
 #include <QObject>
 #include <QWidget>
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QVBoxLayout>
+#include <QPlainTextEdit>
+#include <QLineEdit>
+#include <QCheckBox>
 #include <QPushButton>
 #include "dialoguebucket.h"
 
@@ -22,23 +21,24 @@ public:
 
     void initView();
     void initStyle();
-    void initData();
+    void setBucket(DialogueBucket* bucket);
 
 signals:
 
 public slots:
-    void slotAddLeftChat();
-    void slotAddNarrator();
-    void slotAddRightChat();
 
 private:
-    void addChat(DialogueBucket* bucket, int row = -1);
+    DialogueBucket* current_bucket = nullptr; // 正在编辑的 bucket
 
-private:
-    QListWidget *dialogues_list_widget;
-    QPushButton *left_button, *mid_button, *right_button;
+    DialogueAvatar *avatar_label;
+    QLabel *name_label, *said_label, *style_label;
+    QPlainTextEdit *said_edit, *style_edit;
+    QLineEdit *name_edit;
+    QCheckBox *name_check;
 
-    QList<DialogueBucket*> buckets;
+    QPushButton *export_picture_button;
+    QPushButton *export_text_button;
+    QPushButton *delete_bucket_button;
 };
 
-#endif // DIALOGUEDITOR_H
+#endif // DIALOGUEEDITOR_H

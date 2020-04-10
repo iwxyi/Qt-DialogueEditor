@@ -4,72 +4,86 @@ DialogueEditor::DialogueEditor(QWidget *parent) : QWidget(parent)
 {
     initView();
     initStyle();
-    initData();
 }
 
 void DialogueEditor::initView()
 {
-    dialogues_list_widget = new QListWidget(this);
-    left_button = new QPushButton("+左边", this);
-    mid_button = new QPushButton("+旁白", this);
-    right_button = new QPushButton("+右边", this);
+    avatar_label = new DialogueAvatar(this);
+    name_label = new QLabel("名字", this);
+    name_edit = new QLineEdit(this);
+    said_label = new QLabel("说的话/旁白", this);
+    said_edit = new QPlainTextEdit(this);
+    style_label = new QLabel("样式表", this);
+    style_edit = new QPlainTextEdit(this);
+    name_check = new QCheckBox("显示名字", this);
+    delete_bucket_button = new QPushButton("删除此行", this);
+    export_picture_button = new QPushButton("导出图片", this);
+    export_text_button = new QPushButton("导出文字", this);
 
-    QVBoxLayout* main_vlayout = new QVBoxLayout(this);
-    main_vlayout->addWidget(dialogues_list_widget);
-    QHBoxLayout* button_hlayout = new QHBoxLayout;
-    button_hlayout->addWidget(left_button);
-    button_hlayout->addWidget(mid_button);
-    button_hlayout->addWidget(right_button);
-    main_vlayout->addLayout(button_hlayout);
-    setLayout(main_vlayout);
+    QVBoxLayout *vlayout = new QVBoxLayout(this);
+    vlayout->addWidget(avatar_label);
+    vlayout->addWidget(name_label);
+    vlayout->addWidget(name_edit);
+    vlayout->addWidget(said_label);
+    vlayout->addWidget(said_edit);
+    vlayout->addWidget(style_label);
+    vlayout->addWidget(style_edit);
+    vlayout->addWidget(name_check);
+    QHBoxLayout *button_hlayout = new QHBoxLayout;
+    button_hlayout->addWidget(delete_bucket_button);
+    button_hlayout->addWidget(export_picture_button);
+    button_hlayout->addWidget(export_text_button);
+    vlayout->addLayout(button_hlayout);
 
-    connect(left_button, SIGNAL(clicked()), this, SLOT(slotAddLeftChat()));
-    connect(mid_button, SIGNAL(clicked()), this, SLOT(slotAddNarrator()));
-    connect(right_button, SIGNAL(clicked()), this, SLOT(slotAddRightChat()));
+    vlayout->setMargin(0);
 }
 
 void DialogueEditor::initStyle()
 {
-
 }
 
-void DialogueEditor::initData()
+void DialogueEditor::setBucket(DialogueBucket *bucket)
 {
-
-}
-
-void DialogueEditor::slotAddLeftChat()
-{
-    auto bucket = new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this);
-    addChat(bucket);
-}
-
-void DialogueEditor::slotAddNarrator()
-{
-    addChat(new DialogueBucket("旁白", this));
-}
-
-void DialogueEditor::slotAddRightChat()
-{
-    auto bucket = new DialogueBucket(SelfChat, "我", QPixmap(":/avatars/boy_1"), "说的话", this);
-    bucket->setNameVisible(false);
-    addChat(bucket);
-}
-
-void DialogueEditor::addChat(DialogueBucket *bucket, int row)
-{
-    QListWidgetItem* item = new QListWidgetItem;
-    if (row > -1)
+    current_bucket = bucket;
+    if (bucket == nullptr)
     {
-        buckets.insert(row, bucket);
-        dialogues_list_widget->insertItem(row, item);
+        name_label->setEnabled(false);
+        name_edit->setEnabled(false);
+        said_label->setEnabled(false);
+        said_edit->setEnabled(false);
+        style_label->setEnabled(false);
+        style_edit->setEnabled(false);
+        name_check->setEnabled(false);
+        delete_bucket_button->setEnabled(false);
+    }
+
+    if (bucket->isNarrator())
+    {
+        name_label->setEnabled(false);
+        name_edit->setEnabled(false);
+        said_label->setEnabled(true);
+        said_edit->setEnabled(true);
+        style_label->setEnabled(true);
+        style_edit->setEnabled(true);
+        name_check->setEnabled(false);
+        delete_bucket_button->setEnabled(false);
+
+        said_edit->setPlainText(bucket->styleSheet());
     }
     else
     {
-        buckets.append(bucket);
-        dialogues_list_widget->addItem(item);
+        name_label->setEnabled(true);
+        name_edit->setEnabled(true);
+        said_label->setEnabled(true);
+        said_edit->setEnabled(true);
+        style_label->setEnabled(true);
+        style_edit->setEnabled(true);
+        name_check->setEnabled(true);
+        delete_bucket_button->setEnabled(true);
+
+        avatar_label->setPixmap(*bucket->avatar->pixmap());
+        name_edit->setText(bucket->figure->text());
+        said_edit->setPlainText(bucket->bubble->text());
+        style_edit->setPlainText(bucket->styleSheet());
     }
-    dialogues_list_widget->setItemWidget(item, bucket);
-    item->setSizeHint(bucket->size());
-    bucket->show();
 }

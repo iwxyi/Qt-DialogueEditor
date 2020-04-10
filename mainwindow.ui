@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="DialogueEditor" name="widget" native="true"/>
+     <widget class="DialogueGroup" name="widget" native="true"/>
     </item>
    </layout>
   </widget>
@@ -34,9 +34,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>DialogueEditor</class>
+   <class>DialogueGroup</class>
    <extends>QWidget</extends>
-   <header location="global">dialogueeditor.h</header>
+   <header>dialoguegroup.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
