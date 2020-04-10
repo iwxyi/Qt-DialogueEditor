@@ -11,6 +11,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QDebug>
 #include "dialoguebucket.h"
 
 class DialogueEditor : public QWidget

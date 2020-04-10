@@ -27,8 +27,8 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     bubble = new DialogueBubble(said, this);
 
     alayout->addWidget(avatar);
-    vlayout->addWidget(figure);
-    vlayout->addWidget(bubble);
+    {
+    }
 
     hlayout->setSpacing(12);
     vlayout->setSpacing(4);
@@ -36,10 +36,19 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     vlayout->setAlignment(Qt::AlignVCenter);
     alayout->setAlignment(Qt::AlignTop);
 
+    QHBoxLayout* flayout = new QHBoxLayout;
+    QHBoxLayout* blayout = new QHBoxLayout;
     if (isSelf()) // 自己说的话，靠右对齐
     {
+        hlayout->addSpacing(64);
         hlayout->addLayout(vlayout);
         hlayout->addLayout(alayout);
+
+        flayout->addStretch(1);
+        flayout->addWidget(figure);
+        blayout->addStretch(1);
+        blayout->addWidget(bubble);
+
         hlayout->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         figure->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     }
@@ -47,8 +56,17 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     {
         hlayout->addLayout(alayout);
         hlayout->addLayout(vlayout);
+        hlayout->addSpacing(64);
+
+        flayout->addWidget(figure);
+        flayout->addStretch(1);
+        blayout->addWidget(bubble);
+        blayout->addStretch(1);
+
         hlayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     }
+    vlayout->addLayout(flayout);
+    vlayout->addLayout(blayout);
 }
 
 void DialogueBucket::initView(QString narr)

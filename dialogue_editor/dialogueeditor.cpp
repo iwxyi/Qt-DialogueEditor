@@ -37,7 +37,30 @@ void DialogueEditor::initView()
 
     vlayout->setMargin(0);
 
-
+    connect(name_edit, &QLineEdit::textEdited, this, [=]{
+        if (!current_bucket)
+            return ;
+        current_bucket->figure->setText(name_edit->text());
+    });
+    connect(said_edit, &QPlainTextEdit::textChanged, this, [=]{
+       if (!current_bucket)
+           return ;
+       QLabel* label = current_bucket->isNarrator()
+               ? (QLabel*)current_bucket->narrator
+               : (QLabel*)current_bucket->bubble;
+       label->setText(said_edit->toPlainText());
+       label->adjustSize();
+    });
+    connect(style_edit, &QPlainTextEdit::textChanged, this, [=]{
+       if (!current_bucket)
+           return
+       current_bucket->setStyleSheet(style_edit->toPlainText());
+    });
+    connect(name_check, &QCheckBox::stateChanged, this, [=](int){
+        if (!current_bucket)
+            return ;
+        current_bucket->setNameVisible(name_check->isChecked());
+    });
 
     connect(delete_bucket_button, &QPushButton::clicked, this, [=]{
         emit signalDelete();
