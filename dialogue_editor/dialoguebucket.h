@@ -42,6 +42,7 @@ public:
     static QString getDefaultNarratorStyleSheet();
 
 signals:
+    void signalBubbleChanged();
 
 public slots:
 

@@ -13,6 +13,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QDebug>
+#include <QScrollBar>
 #include "dialoguebucket.h"
 #include "dialogueeditor.h"
 
@@ -25,6 +26,9 @@ public:
     void initView();
     void initStyle();
     void initData();
+
+protected:
+    void resizeEvent(QResizeEvent* event);
 
 signals:
 

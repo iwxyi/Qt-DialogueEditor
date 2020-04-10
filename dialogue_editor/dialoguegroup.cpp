@@ -27,6 +27,9 @@ void DialogueGroup::initView()
     main_hlayout->addLayout(list_vlayout);
     main_hlayout->addWidget(editor);
 
+    dialogues_list_widget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    dialogues_list_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
     connect(left_button, SIGNAL(clicked()), this, SLOT(slotAddLeftChat()));
     connect(mid_button, SIGNAL(clicked()), this, SLOT(slotAddNarrator()));
     connect(right_button, SIGNAL(clicked()), this, SLOT(slotAddRightChat()));
@@ -49,6 +52,23 @@ void DialogueGroup::initStyle()
 void DialogueGroup::initData()
 {
 
+}
+
+void DialogueGroup::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    if (dialogues_list_widget)
+    {
+        int w = dialogues_list_widget->contentsRect().width() - dialogues_list_widget->verticalScrollBar()->width();
+        foreach (auto bucket, buckets) {
+            bucket->setMaximumWidth(w);
+        }
+        for (int i = 0; i < dialogues_list_widget->count(); i++)
+        {
+            dialogues_list_widget->item(i)->setSizeHint(QSize(w, dialogues_list_widget->item(i)->sizeHint().height()));
+        }
+    }
 }
 
 void DialogueGroup::slotAddLeftChat()
@@ -87,6 +107,10 @@ void DialogueGroup::addChat(DialogueBucket *bucket, int row)
         dialogues_list_widget->addItem(item);
     }
     dialogues_list_widget->setItemWidget(item, bucket);
-    item->setSizeHint(bucket->size());
+    bucket->setMaximumWidth(dialogues_list_widget->width() - dialogues_list_widget->verticalScrollBar()->width());
     bucket->show();
+    item->setSizeHint(bucket->size());
+    connect(bucket, &DialogueBucket::signalBubbleChanged, this, [=]{
+        item->setSizeHint(QSize(dialogues_list_widget->contentsRect().width() - dialogues_list_widget->verticalScrollBar()->width(), bucket->sizeHint().height()));
+    });
 }

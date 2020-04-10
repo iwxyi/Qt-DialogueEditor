@@ -50,6 +50,7 @@ void DialogueEditor::initView()
                : (QLabel*)current_bucket->bubble;
        label->setText(said_edit->toPlainText());
        label->adjustSize();
+       emit current_bucket->signalBubbleChanged();
     });
     connect(style_edit, &QPlainTextEdit::textChanged, this, [=]{
        if (!current_bucket)
