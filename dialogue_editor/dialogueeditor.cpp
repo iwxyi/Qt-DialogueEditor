@@ -36,6 +36,18 @@ void DialogueEditor::initView()
     vlayout->addLayout(button_hlayout);
 
     vlayout->setMargin(0);
+
+
+
+    connect(delete_bucket_button, &QPushButton::clicked, this, [=]{
+        emit signalDelete();
+    });
+    connect(export_picture_button, &QPushButton::clicked, this, [=]{
+        emit signalExportPicture();
+    });
+    connect(export_text_button, &QPushButton::clicked, this, [=]{
+        emit signalExportText();
+    });
 }
 
 void DialogueEditor::initStyle()
@@ -55,8 +67,10 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         style_edit->setEnabled(false);
         name_check->setEnabled(false);
         delete_bucket_button->setEnabled(false);
+        return ;
     }
 
+    style_edit->setPlainText(bucket->styleSheet());
     if (bucket->isNarrator())
     {
         name_label->setEnabled(false);
@@ -68,7 +82,7 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         name_check->setEnabled(false);
         delete_bucket_button->setEnabled(false);
 
-        said_edit->setPlainText(bucket->styleSheet());
+        said_edit->setPlainText(bucket->narrator->text());
     }
     else
     {
@@ -84,6 +98,5 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         avatar_label->setPixmap(*bucket->avatar->pixmap());
         name_edit->setText(bucket->figure->text());
         said_edit->setPlainText(bucket->bubble->text());
-        style_edit->setPlainText(bucket->styleSheet());
     }
 }

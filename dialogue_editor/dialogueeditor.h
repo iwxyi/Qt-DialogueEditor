@@ -24,6 +24,9 @@ public:
     void setBucket(DialogueBucket* bucket);
 
 signals:
+    void signalDelete();
+    void signalExportPicture();
+    void signalExportText();
 
 public slots:
 

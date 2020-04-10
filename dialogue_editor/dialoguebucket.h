@@ -9,6 +9,8 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QFile>
+#include <QTextStream>
 #include "dialogueavatar.h"
 #include "dialoguefigure.h"
 #include "dialoguebubble.h"
@@ -35,6 +37,9 @@ public:
     bool isNarrator();
 
     void setNameVisible(bool visible);
+
+    static QString getDefaultChatStyleSheet();
+    static QString getDefaultNarratorStyleSheet();
 
 signals:
 

@@ -18,4 +18,8 @@
         <file alias="girl_10">resources/avatars/girl_10.png</file>
         <file alias="girl_11">resources/avatars/girl_11.png</file>
     </qresource>
+    <qresource prefix="/styles">
+        <file alias="chat">resources/styles/chat.qss</file>
+        <file alias="narrator">resources/styles/narrator.qss</file>
+    </qresource>
 </RCC>

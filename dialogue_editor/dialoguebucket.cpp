@@ -74,3 +74,19 @@ void DialogueBucket::setNameVisible(bool visible)
 {
     figure->setVisible(visible);
 }
+
+QString DialogueBucket::getDefaultChatStyleSheet()
+{
+    QFile file(":/styles/chat");
+    file.open(QFile::ReadOnly);
+    QTextStream in(&file);
+    return in.readAll();
+}
+
+QString DialogueBucket::getDefaultNarratorStyleSheet()
+{
+    QFile file(":/styles/narrator");
+    file.open(QFile::ReadOnly);
+    QTextStream in(&file);
+    return in.readAll();
+}

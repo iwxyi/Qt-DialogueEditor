@@ -54,17 +54,21 @@ void DialogueGroup::initData()
 void DialogueGroup::slotAddLeftChat()
 {
     auto bucket = new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this);
+    bucket->setStyleSheet(DialogueBucket::getDefaultChatStyleSheet());
     addChat(bucket);
 }
 
 void DialogueGroup::slotAddNarrator()
 {
-    addChat(new DialogueBucket("旁白", this));
+    auto bucket = new DialogueBucket("旁白", this);
+    bucket->setStyleSheet(DialogueBucket::getDefaultNarratorStyleSheet());
+    addChat(bucket);
 }
 
 void DialogueGroup::slotAddRightChat()
 {
     auto bucket = new DialogueBucket(SelfChat, "我", QPixmap(":/avatars/boy_1"), "说的话", this);
+    bucket->setStyleSheet(DialogueBucket::getDefaultChatStyleSheet());
     bucket->setNameVisible(false);
     addChat(bucket);
 }
