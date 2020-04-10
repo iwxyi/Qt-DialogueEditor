@@ -23,6 +23,7 @@ SOURCES += \
     dialogue_editor/dialoguebubble.cpp \
     dialogue_editor/dialoguebucket.cpp \
     dialogue_editor/dialogueeditor.cpp \
+    dialogue_editor/dialoguefigure.cpp \
     dialogue_editor/dialoguenarrator.cpp \
     main.cpp \
     mainwindow.cpp
@@ -32,6 +33,7 @@ HEADERS += \
     dialogue_editor/dialoguebubble.h \
     dialogue_editor/dialoguebucket.h \
     dialogue_editor/dialogueeditor.h \
+    dialogue_editor/dialoguefigure.h \
     dialogue_editor/dialoguenarrator.h \
     mainwindow.h
 

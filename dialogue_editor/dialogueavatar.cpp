@@ -4,7 +4,7 @@ DialogueAvatar::DialogueAvatar(QWidget *parent) : QLabel(parent)
 {
     setObjectName("DialogueAvatar");
 
-    setStyleSheet("border-radius: 100%; width: 64px; height: 64px;");
+    setStyleSheet("#DialogueAvatar { border-radius: 100%; width: 32px; height: 32px; }");
 }
 
 DialogueAvatar::DialogueAvatar(QPixmap pixmap, QWidget *parent) : DialogueAvatar(parent)

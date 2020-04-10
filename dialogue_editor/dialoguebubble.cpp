@@ -4,10 +4,10 @@ DialogueBubble::DialogueBubble(QWidget *parent) : QLabel(parent)
 {
     setObjectName("DialogueBubble");
 
-    setStyleSheet("border: none; border-radius: 5px; background: #eeeeee");
+    setStyleSheet("#DialogueBubble { border: none; border-radius: 5px; background-color: #eeeeee; padding: 10px; }");
 }
 
-DialogueBubble::DialogueBubble(QString text, QWidget *parent) : QLabel(text, parent)
+DialogueBubble::DialogueBubble(QString text, QWidget *parent) : DialogueBubble(parent)
 {
-
+    setText(text);
 }

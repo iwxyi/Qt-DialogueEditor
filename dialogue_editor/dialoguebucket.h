@@ -10,27 +10,42 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include "dialogueavatar.h"
+#include "dialoguefigure.h"
 #include "dialoguebubble.h"
+#include "dialoguenarrator.h"
+
+enum ChatType {
+    SelfChat, // 自己说的（右边）
+    OppoChat, // 对方说的（左边）
+    NarrChat, // 旁白文字（中间）
+};
 
 class DialogueBucket : public QWidget
 {
     Q_OBJECT
 public:
-    DialogueBucket(bool self, QString name, QPixmap avatar, QString said, QWidget *parent = nullptr);
+    DialogueBucket(ChatType type, QString name, QPixmap avatar, QString said, QWidget *parent = nullptr);
+    DialogueBucket(QString narr, QWidget *parent = nullptr);
 
     void initView(QString name, QPixmap ava, QString said);
-    void initStyle();
+    void initView(QString narr);
+
+    bool isSelf();
+    bool isNarrator();
+
+    void setNameVisible(bool visible);
 
 signals:
 
 public slots:
 
 private:
-    bool is_self = false; // 是否是自己说的话（即在右边）
+    ChatType type = SelfChat;
 
-    QLabel *name_label;
-    DialogueAvatar *avatar; // 头像
-    DialogueBubble *bubble; // 气泡
+    DialogueFigure *figure = nullptr; // 姓名
+    DialogueAvatar *avatar = nullptr; // 头像
+    DialogueBubble *bubble = nullptr; // 气泡
+    DialogueNarrator *narrator = nullptr; // 旁白
 };
 
 #endif // DIALOGUEBUCKET_H

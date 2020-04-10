@@ -40,17 +40,20 @@ void DialogueEditor::initData()
 
 void DialogueEditor::slotAddLeftChat()
 {
-    addChat(new DialogueBucket(false, "名字", QPixmap(":/avatars/girl_1"), "说的话", this));
+    auto bucket = new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this);
+    addChat(bucket);
 }
 
 void DialogueEditor::slotAddNarrator()
 {
-
+    addChat(new DialogueBucket("旁白", this));
 }
 
 void DialogueEditor::slotAddRightChat()
 {
-    addChat(new DialogueBucket(true, "我", QPixmap(":/avatars/boy_1"), "说的话", this));
+    auto bucket = new DialogueBucket(SelfChat, "我", QPixmap(":/avatars/boy_1"), "说的话", this);
+    bucket->setNameVisible(false);
+    addChat(bucket);
 }
 
 void DialogueEditor::addChat(DialogueBucket *bucket, int row)

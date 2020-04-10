@@ -6,13 +6,14 @@
 #define NARRATORWIDGET_H
 
 #include <QObject>
-#include <QWidget>
+#include <QLabel>
 
-class DialogueNarrator : public QWidget
+class DialogueNarrator : public QLabel
 {
     Q_OBJECT
 public:
-    explicit DialogueNarrator(QWidget *parent = nullptr);
+    DialogueNarrator(QWidget *parent = nullptr);
+    DialogueNarrator(QString narr, QWidget* parent = nullptr);
 
 signals:
 
