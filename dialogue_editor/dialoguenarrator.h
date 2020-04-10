@@ -8,15 +8,18 @@
 #include <QObject>
 #include <QWidget>
 
-class NarratorWidget : public QWidget
+class DialogueNarrator : public QWidget
 {
     Q_OBJECT
 public:
-    explicit NarratorWidget(QWidget *parent = nullptr);
+    explicit DialogueNarrator(QWidget *parent = nullptr);
 
 signals:
 
 public slots:
+
+private:
+
 };
 
 #endif // NARRATORWIDGET_H

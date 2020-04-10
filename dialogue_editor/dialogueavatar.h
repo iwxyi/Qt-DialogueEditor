@@ -12,6 +12,7 @@ class DialogueAvatar : public QLabel
 {
 public:
     DialogueAvatar(QWidget* parent = nullptr);
+    DialogueAvatar(QPixmap pixmap, QWidget* parent = nullptr);
 };
 
 #endif // DIALOGUEAVATAR_H

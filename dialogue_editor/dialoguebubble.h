@@ -12,6 +12,7 @@ class DialogueBubble : public QLabel
 {
 public:
     DialogueBubble(QWidget* parent = nullptr);
+    DialogueBubble(QString text, QWidget* parent = nullptr);
 };
 
 #endif // DIALOGUEBUBBLE_H

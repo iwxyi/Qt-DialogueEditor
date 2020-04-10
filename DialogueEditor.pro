@@ -22,8 +22,8 @@ SOURCES += \
     dialogue_editor/dialogueavatar.cpp \
     dialogue_editor/dialoguebubble.cpp \
     dialogue_editor/dialoguebucket.cpp \
-    dialogue_editor/dialogueditor.cpp \
-    dialogue_editor/narratorwidget.cpp \
+    dialogue_editor/dialogueeditor.cpp \
+    dialogue_editor/dialoguenarrator.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -31,8 +31,8 @@ HEADERS += \
     dialogue_editor/dialogueavatar.h \
     dialogue_editor/dialoguebubble.h \
     dialogue_editor/dialoguebucket.h \
-    dialogue_editor/dialogueditor.h \
-    dialogue_editor/narratorwidget.h \
+    dialogue_editor/dialogueeditor.h \
+    dialogue_editor/dialoguenarrator.h \
     mainwindow.h
 
 FORMS += \
