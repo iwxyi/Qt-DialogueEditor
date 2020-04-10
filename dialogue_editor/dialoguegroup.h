@@ -38,7 +38,7 @@ public slots:
     void slotAddRightChat();
 
 private:
-    void addChat(DialogueBucket* bucket, int row = -1);
+    QListWidgetItem *addChat(DialogueBucket* bucket, int row = -1);
 
 private:
     QListWidget *dialogues_list_widget;

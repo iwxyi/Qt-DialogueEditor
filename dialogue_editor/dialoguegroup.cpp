@@ -75,14 +75,20 @@ void DialogueGroup::slotAddLeftChat()
 {
     auto bucket = new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this);
     bucket->setStyleSheet(DialogueBucket::getDefaultChatStyleSheet());
-    addChat(bucket);
+    auto item = addChat(bucket);
+    dialogues_list_widget->setCurrentItem(item);
+    dialogues_list_widget->scrollToItem(item);
+    dialogues_list_widget->setFocus();
 }
 
 void DialogueGroup::slotAddNarrator()
 {
     auto bucket = new DialogueBucket("旁白", this);
     bucket->setStyleSheet(DialogueBucket::getDefaultNarratorStyleSheet());
-    addChat(bucket);
+    auto item = addChat(bucket);
+    dialogues_list_widget->setCurrentItem(item);
+    dialogues_list_widget->scrollToItem(item);
+    dialogues_list_widget->setFocus();
 }
 
 void DialogueGroup::slotAddRightChat()
@@ -90,10 +96,13 @@ void DialogueGroup::slotAddRightChat()
     auto bucket = new DialogueBucket(SelfChat, "我", QPixmap(":/avatars/boy_1"), "说的话", this);
     bucket->setStyleSheet(DialogueBucket::getDefaultChatStyleSheet());
     bucket->setNameVisible(false);
-    addChat(bucket);
+    auto item = addChat(bucket);
+    dialogues_list_widget->setCurrentItem(item);
+    dialogues_list_widget->scrollToItem(item);
+    dialogues_list_widget->setFocus();
 }
 
-void DialogueGroup::addChat(DialogueBucket *bucket, int row)
+QListWidgetItem* DialogueGroup::addChat(DialogueBucket *bucket, int row)
 {
     QListWidgetItem* item = new QListWidgetItem;
     if (row > -1)
@@ -113,4 +122,5 @@ void DialogueGroup::addChat(DialogueBucket *bucket, int row)
     connect(bucket, &DialogueBucket::signalBubbleChanged, this, [=]{
         item->setSizeHint(QSize(dialogues_list_widget->contentsRect().width() - dialogues_list_widget->verticalScrollBar()->width(), bucket->sizeHint().height()));
     });
+    return item;
 }

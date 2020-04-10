@@ -4,6 +4,8 @@ DialogueEditor::DialogueEditor(QWidget *parent) : QWidget(parent)
 {
     initView();
     initStyle();
+
+    setBucket(nullptr);
 }
 
 void DialogueEditor::initView()
