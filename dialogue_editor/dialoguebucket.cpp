@@ -21,11 +21,14 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     vlayout->addWidget(name_label);
     vlayout->addWidget(bubble);
 
+    hlayout->setSpacing(12);
+
     if (is_self) // 自己说的话，靠右对齐
     {
         hlayout->addLayout(vlayout);
         hlayout->addWidget(avatar);
         hlayout->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        name_label->setAlignment(Qt::AlignRight);
     }
     else // 对方说的话，靠左对齐
     {

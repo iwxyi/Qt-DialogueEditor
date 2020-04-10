@@ -40,7 +40,7 @@ void DialogueEditor::initData()
 
 void DialogueEditor::slotAddLeftChat()
 {
-    addChat(new DialogueBucket(false, "名字", QPixmap(), "说的话", this));
+    addChat(new DialogueBucket(false, "名字", QPixmap(":/avatars/girl_1"), "说的话", this));
 }
 
 void DialogueEditor::slotAddNarrator()
@@ -50,7 +50,7 @@ void DialogueEditor::slotAddNarrator()
 
 void DialogueEditor::slotAddRightChat()
 {
-    addChat(new DialogueBucket(true, "我", QPixmap(), "说的话", this));
+    addChat(new DialogueBucket(true, "我", QPixmap(":/avatars/boy_1"), "说的话", this));
 }
 
 void DialogueEditor::addChat(DialogueBucket *bucket, int row)
