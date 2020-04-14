@@ -12,6 +12,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QDebug>
+#include <QTimer>
 #include "dialoguebucket.h"
 
 class DialogueEditor : public QWidget
@@ -30,6 +31,7 @@ signals:
     void signalSaveFigure(DialogueBucket* bucket);
 
 public slots:
+    void focusSaid();
 
 private:
     DialogueBucket* current_bucket = nullptr; // 正在编辑的 bucket

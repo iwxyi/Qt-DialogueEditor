@@ -35,7 +35,7 @@ void DialogueGroup::initView()
     main_hlayout->addWidget(editor);
 
     main_hlayout->setStretch(0, 1);
-    main_hlayout->setStretch(1, 2);
+    main_hlayout->setStretch(1, 3);
     main_hlayout->setStretch(2, 2);
 
     dialogues_list_widget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -44,6 +44,7 @@ void DialogueGroup::initView()
     dialogues_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     figure_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
     figure_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    figure_list_widget->setToolTip("角色模板，双击插入该角色至对话框");
 
     connect(left_button, SIGNAL(clicked()), this, SLOT(slotAddLeftChat()));
     connect(mid_button, SIGNAL(clicked()), this, SLOT(slotAddNarrator()));
@@ -57,6 +58,10 @@ void DialogueGroup::initView()
         }
         auto bucket = buckets[row];
         editor->setBucket(bucket);
+    });
+    connect(dialogues_list_widget, &QListWidget::doubleClicked, this, [=](const QModelIndex& index) {
+        int row = index.row();
+        editor->focusSaid();
     });
     connect(dialogues_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotListMenuShowed(QPoint)));
 

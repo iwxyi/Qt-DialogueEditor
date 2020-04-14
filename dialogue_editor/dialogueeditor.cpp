@@ -129,3 +129,11 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         said_edit->setPlainText(bucket->bubble->text());
     }
 }
+
+void DialogueEditor::focusSaid()
+{
+    QTimer::singleShot(100, [=]{
+        said_edit->setFocus();
+        said_edit->selectAll();
+    });
+}
