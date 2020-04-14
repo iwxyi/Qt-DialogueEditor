@@ -2,6 +2,11 @@
 #define DIALOGUEMANAGER_H
 
 #include <QList>
+#include <QDir>
+#include <QFile>
+#include <QTextCodec>
+#include <QSettings>
+#include <QDebug>
 #include "dialoguefigure.h"
 #include "dialoguebucket.h"
 
@@ -13,14 +18,23 @@ public:
 
     void setDataDir(QString dir);
     void loadData();
-    void saveData();
+    void saveData(DialogueFigure* figure);
 
     void saveFigure(DialogueBucket* bucket);
     void deleteFigure(QString name);
 
     QList<DialogueFigure*>& getFigures();
-    DialogueFigure* getFigure(QString id);
+    DialogueFigure* getFigureByName(QString name);
+    DialogueFigure* getFigureById(QString id);
+
+private:
     DialogueFigure* createFigure(ChatType t, QString n, QPixmap a, QString ss);
+    QString createFigureID();
+
+private:
+    static QString readTextFile(QString path);
+
+    static bool writeTextFile(QString path, QString text);
 
 signals:
 

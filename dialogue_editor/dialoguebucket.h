@@ -44,6 +44,7 @@ public:
     static QString getDefaultNarratorStyleSheet();
 
     QString getName();
+    QPixmap getAvatar();
 
 signals:
     void signalBubbleChanged();

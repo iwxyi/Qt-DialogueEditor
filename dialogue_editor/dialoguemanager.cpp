@@ -7,23 +7,51 @@ DialogueManager::DialogueManager(QObject *parent) : QObject(parent)
 
 void DialogueManager::setDataDir(QString dir)
 {
+    if (!dir.endsWith("/"))
+        dir += "/";
     this->data_dir = dir;
 }
 
 /**
  * 从文件从读取角色模板和配置信息
+ * data_dir/
+ *   - figures/
+ *     - figure_id/
+ *       - config.ini
+ *       - style_sheet.qss
+ *       - avatar.png
  */
 void DialogueManager::loadData()
 {
-
+    QDir dirs(data_dir+"figures"); // data_dir/figures/aaa/config
+    auto infos = dirs.entryInfoList();
+    foreach (auto info, infos)
+    {
+        if (!info.isDir())
+            continue;
+        QDir dir(info.absoluteFilePath());
+        QString txt = readTextFile(dir.absoluteFilePath("config"));
+        QSettings s(dir.absoluteFilePath("config.ini"));
+        createFigure((ChatType)(s.value("type").toInt()), s.value("nickname").toString(), QPixmap(dir.absoluteFilePath("avatar.png")), readTextFile(dir.absoluteFilePath("style_sheet.qss")));
+    }
 }
 
 /**
  * 保存角色模板与设置到文件
  */
-void DialogueManager::saveData()
+void DialogueManager::saveData(DialogueFigure *figure)
 {
-
+    QString path = data_dir + "figures/" + figure->figure_id + "/";
+    qDebug() << "save" << path;
+    QDir dir(path);
+    dir.mkpath(path);
+    writeTextFile(dir.absoluteFilePath("config.ini"), "");
+    QSettings s(dir.absoluteFilePath("config.ini"));
+    s.setValue("type", (int)figure->type);
+    s.setValue("nickname", figure->nickname);
+    s.sync();
+    figure->avatar.save(dir.absoluteFilePath("avatar.png"));
+    writeTextFile(dir.absoluteFilePath("style_sheet.qss"), figure->qss);
 }
 
 /**
@@ -32,10 +60,20 @@ void DialogueManager::saveData()
  */
 void DialogueManager::saveFigure(DialogueBucket *bucket)
 {
-    DialogueFigure* figure = bucket->figure_id.isEmpty() ? nullptr : getFigure(bucket->figure_id);
+    DialogueFigure* figure = bucket->figure_id.isEmpty() ? nullptr : getFigureById(bucket->figure_id);
+    if (!figure) // 没有相同ID，尝试按名字查找
+        figure = bucket->isNarrator() ? nullptr : getFigureByName(bucket->getName());
     if (!figure) // 如果没有对应的角色模板，则创建
         figure = createFigure(bucket->type, bucket->nickname->text(), *bucket->avatar->pixmap(), bucket->styleSheet());
-
+    else // 更新模板
+    {
+        figure->type = bucket->type;
+        figure->nickname = bucket->getName();
+        figure->avatar = bucket->getAvatar();
+        figure->qss = bucket->styleSheet();
+    }
+    // 保存figure
+    saveData(figure);
 }
 
 void DialogueManager::deleteFigure(QString name)
@@ -48,7 +86,17 @@ QList<DialogueFigure *> &DialogueManager::getFigures()
     return figures;
 }
 
-DialogueFigure *DialogueManager::getFigure(QString id)
+DialogueFigure *DialogueManager::getFigureByName(QString name)
+{
+    foreach (auto figure, figures)
+    {
+        if (figure->nickname == name)
+            return figure;
+    }
+    return nullptr;
+}
+
+DialogueFigure *DialogueManager::getFigureById(QString id)
 {
     foreach (auto figure, figures)
     {
@@ -61,9 +109,60 @@ DialogueFigure *DialogueManager::getFigure(QString id)
 DialogueFigure *DialogueManager::createFigure(ChatType t, QString n, QPixmap a, QString ss)
 {
     auto figure = new DialogueFigure(this);
+    figure->figure_id = createFigureID();
     figure->type = t;
     figure->nickname = n;
     figure->avatar = a;
     figure->qss = ss;
     figures.append(figure);
+    return figure;
+}
+
+QString DialogueManager::createFigureID()
+{
+    QString id;
+    QString chars = "qwertyuiopasdfghjklzxcvbnm1029384756";
+    const int len = 8, l = chars.length();
+    srand(time(0));
+    do {
+        id = "";
+        for (int i = 0; i < len; i++)
+            id += chars.at(rand() % l);
+    } while (getFigureById(id) != nullptr);
+    return id;
+}
+
+QString DialogueManager::readTextFile(QString path)
+{
+    QString text;
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return "";
+    }
+    if (!file.isReadable())
+    {
+        return "";
+    }
+    QTextStream text_stream(&file);
+    text_stream.setCodec(QTextCodec::codecForName(QByteArray("utf-8")));
+    while(!text_stream.atEnd())
+    {
+        text = text_stream.readAll();
+    }
+    file.close();
+    return text;
+}
+
+bool DialogueManager::writeTextFile(QString path, QString text)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+    }
+    QTextStream text_stream(&file);
+    text_stream.setCodec(QTextCodec::codecForName(QByteArray("utf-8")));
+    text_stream << text;
+    file.close();
+    return true;
 }

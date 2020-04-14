@@ -133,3 +133,8 @@ QString DialogueBucket::getName()
     else
         return nickname->text();
 }
+
+QPixmap DialogueBucket::getAvatar()
+{
+    return *avatar->pixmap();
+}
