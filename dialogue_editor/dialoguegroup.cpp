@@ -183,7 +183,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
 
     QMenu* menu = new QMenu("菜单");
     QAction* insert_dialogue_action = new QAction("添加该角色对话", this);
-    QAction* select_all_dialogue_action = new QAction("更新选中角色所有对话", this);
+    QAction* select_all_dialogue_action = new QAction("选中该角色所有对话", this);
     QAction* figure_update_all_action = new QAction("套用样式至该角色所有对话", this);
     QAction* figure_update_select_action = new QAction("套用样式至选中对话", this);
     QAction* move_up_action = new QAction("上移", this);
@@ -393,16 +393,17 @@ void DialogueGroup::actionSelectFigureDialogue()
     dialogues_list_widget->clearSelection();
     for (int i = 0; i < items.size(); i++)
     {
-        auto figure = figures.at(i);
+        int row = figure_list_widget->row(items.at(i));
+        auto figure = figures.at(row); // 选中 角色
         // 遍历插入选中项
         if (figure->type == NarrChat)
         {
             // 选中所有旁白
-            for (int i = 0; i < buckets.size(); i++)
+            for (int k = 0; k < buckets.size(); k++)
             {
-                auto bucket = buckets.at(i);
+                auto bucket = buckets.at(k);
                 if (bucket->isNarrator())
-                    dialogues_list_widget->setCurrentRow(i);
+                    dialogues_list_widget->setCurrentRow(k, QItemSelectionModel::Select);
             }
         }
         else
@@ -411,11 +412,13 @@ void DialogueGroup::actionSelectFigureDialogue()
             QString name = figure->nickname;
             if (name.isEmpty())
                 continue;
-            for (int i = 0; i < buckets.size(); i++)
+            for (int k = 0; k < buckets.size(); k++)
             {
-                auto bucket = buckets.at(i);
+                auto bucket = buckets.at(k);
                 if (!bucket->isNarrator() && bucket->getName() == name)
-                    dialogues_list_widget->setCurrentRow(i);
+                {
+                    dialogues_list_widget->setCurrentRow(k, QItemSelectionModel::Select);
+                }
             }
         }
     }

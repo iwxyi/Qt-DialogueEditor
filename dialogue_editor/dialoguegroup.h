@@ -17,6 +17,7 @@
 #include <QScrollBar>
 #include <QMenu>
 #include <QAction>
+#include <QMessageBox>
 #include "dialoguebucket.h"
 #include "dialogueeditor.h"
 #include "dialoguemanager.h"
