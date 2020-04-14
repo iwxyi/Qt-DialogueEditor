@@ -23,6 +23,25 @@ void DialogueManager::setDataDir(QString dir)
  */
 void DialogueManager::loadData()
 {
+    QStringList ids = readTextFile(data_dir + "figures.order").split("\n");
+    foreach (QString s, ids)
+    {
+        QString path = data_dir + "figures/" + s;
+        QFileInfo info(path);
+        if (!info.isDir())
+            continue;
+        QDir dir(info.absoluteFilePath());
+        if (!QFile(dir.absoluteFilePath("config.ini")).exists())
+            continue;
+        QSettings sts(dir.absoluteFilePath("config.ini"), QSettings::IniFormat, this);
+        createFigure((ChatType)(sts.value("type").toInt()),
+                     sts.value("nickname").toString(),
+                     QPixmap(dir.absoluteFilePath("avatar.png")),
+                     readTextFile(dir.absoluteFilePath("style_sheet.qss")),
+                     sts.value("id").toString());
+    }
+
+    /*// 按目录读取
     QDir dirs(data_dir+"figures"); // data_dir/figures/aaa/config
     auto infos = dirs.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     foreach (auto info, infos)
@@ -33,8 +52,12 @@ void DialogueManager::loadData()
         if (!QFile(dir.absoluteFilePath("config.ini")).exists())
             continue;
         QSettings s(dir.absoluteFilePath("config.ini"), QSettings::IniFormat, this);
-        createFigure((ChatType)(s.value("type").toInt()), s.value("nickname").toString(), QPixmap(dir.absoluteFilePath("avatar.png")), readTextFile(dir.absoluteFilePath("style_sheet.qss")), s.value("id").toString());
-    }
+        createFigure((ChatType)(s.value("type").toInt()),
+                        s.value("nickname").toString(),
+                        QPixmap(dir.absoluteFilePath("avatar.png")),
+                        readTextFile(dir.absoluteFilePath("style_sheet.qss")),
+                        s.value("id").toString());
+    }*/
 }
 
 /**
@@ -51,6 +74,16 @@ void DialogueManager::saveData(DialogueFigure *figure)
     s.setValue("nickname", figure->nickname);
     figure->avatar.save(dir.absoluteFilePath("avatar.png"));
     writeTextFile(dir.absoluteFilePath("style_sheet.qss"), figure->qss);
+}
+
+void DialogueManager::saveOrder()
+{
+    QStringList order;
+    for (int i = 0; i < figures.size(); i++)
+    {
+        order << figures.at(i)->figure_id;
+    }
+    writeTextFile(data_dir + "figures.order", order.join("\n"));
 }
 
 /**

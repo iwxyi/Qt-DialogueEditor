@@ -19,6 +19,7 @@ public:
     void setDataDir(QString dir);
     void loadData();
     void saveData(DialogueFigure* figure);
+    void saveOrder();
 
     void saveFigure(DialogueBucket* bucket);
     void deleteFigure(DialogueFigure* figure);

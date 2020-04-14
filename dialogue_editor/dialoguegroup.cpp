@@ -224,6 +224,7 @@ void DialogueGroup::slotSaveFigure(DialogueBucket *bucket)
     if (bucket == nullptr)
         return ;
     manager->saveFigure(bucket);
+    manager->saveOrder();
     refreshFigures();
 }
 
@@ -233,26 +234,48 @@ void DialogueGroup::slotInsertFromFigure(DialogueFigure *figure)
     dialogues_list_widget->clearSelection();
     if (figure->type == ChatType::NarrChat)
     {
-        foreach (auto item, items)
+        if (items.size() == 0) // 没有选中
         {
             insertBucketAndSetQSS(
-                item,
+                -1,
                 new DialogueBucket("旁白", this),
-                figure->qss,
-                true
+                figure->qss
             );
+        }
+        else
+        {
+            foreach (auto item, items)
+            {
+                insertBucketAndSetQSS(
+                    item,
+                    new DialogueBucket("旁白", this),
+                    figure->qss,
+                    true
+                );
+            }
         }
     }
     else
     {
-        foreach (auto item, items)
+        if (items.size() == 0) // 没有选中
         {
             insertBucketAndSetQSS(
-                item,
+                -1,
                 new DialogueBucket(figure->type, figure->nickname, figure->avatar, "说的话", this),
-                figure->qss,
-                true
+                figure->qss
             );
+        }
+        else
+        {
+            foreach (auto item, items)
+            {
+                insertBucketAndSetQSS(
+                    item,
+                    new DialogueBucket(figure->type, figure->nickname, figure->avatar, "说的话", this),
+                    figure->qss,
+                    true
+                );
+            }
         }
     }
 }
@@ -437,7 +460,7 @@ void DialogueGroup::actionUpdateSelectedDialogues()
 void DialogueGroup::actionFigureMoveUp()
 {
     auto items = figure_list_widget->selectedItems();
-    auto figures = manager->getFigures();
+    auto& figures = manager->getFigures();
     for (int i = 0; i < items.size(); i++)
     {
         int row = figure_list_widget->row(items.at(i));
@@ -446,13 +469,14 @@ void DialogueGroup::actionFigureMoveUp()
         auto figure = figures.takeAt(row);
         figures.insert(row-1, figure);
     }
+    manager->saveOrder();
     refreshFigures();
 }
 
 void DialogueGroup::actionFigureMoveDown()
 {
     auto items = figure_list_widget->selectedItems();
-    auto figures = manager->getFigures();
+    auto& figures = manager->getFigures();
     for (int i = items.size()-1; i >= 0; i--) // 倒着来
     {
         int row = figure_list_widget->row(items.at(i));
@@ -461,6 +485,7 @@ void DialogueGroup::actionFigureMoveDown()
         auto figure = figures.takeAt(row);
         figures.insert(row+1, figure);
     }
+    manager->saveOrder();
     refreshFigures();
 }
 
@@ -475,6 +500,7 @@ void DialogueGroup::actionFigureDelete()
             continue;
         manager->deleteFigure(figures.at(row));
     }
+    manager->saveOrder();
     refreshFigures();
 }
 
