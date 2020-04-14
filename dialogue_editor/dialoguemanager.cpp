@@ -33,7 +33,7 @@ void DialogueManager::loadData()
         if (!QFile(dir.absoluteFilePath("config.ini")).exists())
             continue;
         QSettings s(dir.absoluteFilePath("config.ini"), QSettings::IniFormat, this);
-        createFigure((ChatType)(s.value("type").toInt()), s.value("nickname").toString(), QPixmap(dir.absoluteFilePath("avatar.png")), readTextFile(dir.absoluteFilePath("style_sheet.qss")));
+        createFigure((ChatType)(s.value("type").toInt()), s.value("nickname").toString(), QPixmap(dir.absoluteFilePath("avatar.png")), readTextFile(dir.absoluteFilePath("style_sheet.qss")), s.value("id").toString());
     }
 }
 
@@ -46,6 +46,7 @@ void DialogueManager::saveData(DialogueFigure *figure)
     QDir dir(path);
     dir.mkpath(path);
     QSettings s(path + "config.ini", QSettings::IniFormat, this);
+    s.setValue("id", figure->figure_id);
     s.setValue("type", (int)figure->type);
     s.setValue("nickname", figure->nickname);
     figure->avatar.save(dir.absoluteFilePath("avatar.png"));
@@ -80,9 +81,13 @@ void DialogueManager::saveFigure(DialogueBucket *bucket)
     saveData(figure);
 }
 
-void DialogueManager::deleteFigure(QString name)
+void DialogueManager::deleteFigure(DialogueFigure* figure)
 {
-
+    figures.removeOne(figure);
+    QString id = figure->figure_id;
+    QDir dir(data_dir + "figures/" + id);
+    dir.removeRecursively(); // 强制删除文件夹及其内容
+    delete figure;
 }
 
 QList<DialogueFigure *> &DialogueManager::getFigures()
@@ -110,10 +115,10 @@ DialogueFigure *DialogueManager::getFigureById(QString id)
     return nullptr;
 }
 
-DialogueFigure *DialogueManager::createFigure(ChatType t, QString n, QPixmap a, QString ss)
+DialogueFigure *DialogueManager::createFigure(ChatType t, QString n, QPixmap a, QString ss, QString id)
 {
     auto figure = new DialogueFigure(this);
-    figure->figure_id = createFigureID();
+    figure->figure_id = id.isEmpty() ? createFigureID() : id;
     figure->type = t;
     figure->nickname = n;
     figure->avatar = a;
@@ -122,10 +127,10 @@ DialogueFigure *DialogueManager::createFigure(ChatType t, QString n, QPixmap a, 
     return figure;
 }
 
-DialogueFigure *DialogueManager::createFigure(ChatType t, QString ss)
+DialogueFigure *DialogueManager::createFigure(ChatType t, QString ss, QString id)
 {
     auto figure = new DialogueFigure(this);
-    figure->figure_id = createFigureID();
+    figure->figure_id = id.isEmpty() ? createFigureID() : id;
     figure->type = t;
     figure->nickname = "[旁白]";
     figure->qss = ss;

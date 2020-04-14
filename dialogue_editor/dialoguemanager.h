@@ -21,15 +21,15 @@ public:
     void saveData(DialogueFigure* figure);
 
     void saveFigure(DialogueBucket* bucket);
-    void deleteFigure(QString name);
+    void deleteFigure(DialogueFigure* figure);
 
     QList<DialogueFigure*>& getFigures();
     DialogueFigure* getFigureByName(QString name);
     DialogueFigure* getFigureById(QString id);
 
 private:
-    DialogueFigure* createFigure(ChatType t, QString n, QPixmap a, QString ss);
-    DialogueFigure* createFigure(ChatType t, QString ss);
+    DialogueFigure* createFigure(ChatType t, QString n, QPixmap a, QString ss, QString id = "");
+    DialogueFigure* createFigure(ChatType t, QString ss, QString id = "");
     QString createFigureID();
 
 private:

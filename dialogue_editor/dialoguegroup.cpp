@@ -467,13 +467,13 @@ void DialogueGroup::actionFigureMoveDown()
 void DialogueGroup::actionFigureDelete()
 {
     auto items = figure_list_widget->selectedItems();
-    auto figures = manager->getFigures();
+    auto& figures = manager->getFigures();
     for (int i = 0; i < items.size(); i++)
     {
         int row = figure_list_widget->row(items.at(i));
         if (row < 0)
             continue;
-        figures.removeAt(row);
+        manager->deleteFigure(figures.at(row));
     }
     refreshFigures();
 }
