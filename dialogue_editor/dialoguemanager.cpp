@@ -24,14 +24,15 @@ void DialogueManager::setDataDir(QString dir)
 void DialogueManager::loadData()
 {
     QDir dirs(data_dir+"figures"); // data_dir/figures/aaa/config
-    auto infos = dirs.entryInfoList();
+    auto infos = dirs.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     foreach (auto info, infos)
     {
         if (!info.isDir())
             continue;
         QDir dir(info.absoluteFilePath());
-        QString txt = readTextFile(dir.absoluteFilePath("config"));
-        QSettings s(dir.absoluteFilePath("config.ini"));
+        if (!QFile(dir.absoluteFilePath("config.ini")).exists())
+            continue;
+        QSettings s(dir.absoluteFilePath("config.ini"), QSettings::IniFormat, this);
         createFigure((ChatType)(s.value("type").toInt()), s.value("nickname").toString(), QPixmap(dir.absoluteFilePath("avatar.png")), readTextFile(dir.absoluteFilePath("style_sheet.qss")));
     }
 }
@@ -42,14 +43,11 @@ void DialogueManager::loadData()
 void DialogueManager::saveData(DialogueFigure *figure)
 {
     QString path = data_dir + "figures/" + figure->figure_id + "/";
-    qDebug() << "save" << path;
     QDir dir(path);
     dir.mkpath(path);
-    writeTextFile(dir.absoluteFilePath("config.ini"), "");
-    QSettings s(dir.absoluteFilePath("config.ini"));
+    QSettings s(path + "config.ini", QSettings::IniFormat, this);
     s.setValue("type", (int)figure->type);
     s.setValue("nickname", figure->nickname);
-    s.sync();
     figure->avatar.save(dir.absoluteFilePath("avatar.png"));
     writeTextFile(dir.absoluteFilePath("style_sheet.qss"), figure->qss);
 }

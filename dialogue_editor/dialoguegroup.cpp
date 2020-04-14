@@ -89,6 +89,7 @@ void DialogueGroup::setDataDirAndLoad(QString dir)
 {
     manager->setDataDir(dir);
     manager->loadData();
+    refreshFigures();
 }
 
 void DialogueGroup::resizeEvent(QResizeEvent *event)
