@@ -14,6 +14,8 @@
 #include <QPushButton>
 #include <QDebug>
 #include <QScrollBar>
+#include <QMenu>
+#include <QAction>
 #include "dialoguebucket.h"
 #include "dialogueeditor.h"
 
@@ -36,6 +38,14 @@ public slots:
     void slotAddLeftChat();
     void slotAddNarrator();
     void slotAddRightChat();
+    void slotListMenuShowed(QPoint pos);
+
+    void actionInsertLeftChat();
+    void actionInsertNarrator();
+    void actionInsertRightChat();
+    void actionChatMoveUp();
+    void actionChatMoveDown();
+    void actionChatDelete();
 
 private:
     QListWidgetItem *addChat(DialogueBucket* bucket, int row = -1);
