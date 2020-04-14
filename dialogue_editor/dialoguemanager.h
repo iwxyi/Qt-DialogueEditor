@@ -8,7 +8,11 @@ class DialogueManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit DialogueManager(QObject *parent = nullptr);
+    DialogueManager(QObject *parent = nullptr);
+
+    void setDataDir(QString dir);
+    void loadData();
+    void saveData();
 
 signals:
 

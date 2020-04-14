@@ -7,9 +7,15 @@ DialogueGroup::DialogueGroup(QWidget *parent) : QWidget(parent)
     initData();
 }
 
+DialogueGroup::DialogueGroup(QString dir, QWidget *parent) : DialogueGroup(parent)
+{
+    setDataDirAndLoad(dir);
+}
+
 void DialogueGroup::initView()
 {
     dialogues_list_widget = new QListWidget(this);
+    figure_list_widget = new QListWidget(this);
     left_button = new QPushButton("+左边", this);
     mid_button = new QPushButton("+旁白", this);
     right_button = new QPushButton("+右边", this);
@@ -22,8 +28,9 @@ void DialogueGroup::initView()
     button_hlayout->addWidget(right_button);
     list_vlayout->addLayout(button_hlayout);
 
-    QHBoxLayout* main_hlayout = new QHBoxLayout(this);
     editor = new DialogueEditor(this);
+    QHBoxLayout* main_hlayout = new QHBoxLayout(this);
+    main_hlayout->addWidget(figure_list_widget);
     main_hlayout->addLayout(list_vlayout);
     main_hlayout->addWidget(editor);
 
@@ -31,6 +38,8 @@ void DialogueGroup::initView()
     dialogues_list_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     dialogues_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
     dialogues_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    figure_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
+    figure_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     connect(left_button, SIGNAL(clicked()), this, SLOT(slotAddLeftChat()));
     connect(mid_button, SIGNAL(clicked()), this, SLOT(slotAddNarrator()));
@@ -54,7 +63,13 @@ void DialogueGroup::initStyle()
 
 void DialogueGroup::initData()
 {
+    manager = new DialogueManager(this);
+}
 
+void DialogueGroup::setDataDirAndLoad(QString dir)
+{
+    manager->setDataDir(dir);
+    manager->loadData();
 }
 
 void DialogueGroup::resizeEvent(QResizeEvent *event)
@@ -226,7 +241,7 @@ void DialogueGroup::actionChatDelete()
     for (int i = 0; i < items.size(); i++)
     {
         int row = dialogues_list_widget->row(items.at(i));
-        if (row <= 0)
+        if (row < 0)
             continue;
         auto item = dialogues_list_widget->takeItem(row);
         auto widget = static_cast<DialogueBucket*>(dialogues_list_widget->itemWidget(item));

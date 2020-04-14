@@ -9,13 +9,13 @@ class DialogueFigure : public QObject
 {
     Q_OBJECT
 public:
-    explicit DialogueFigure(QObject *parent = nullptr);
+    DialogueFigure(QObject *parent = nullptr);
 
 signals:
 
 public slots:
 
-private:
+protected:
     bool is_self = false; // 是否在右边
     QString nickname;
     QPixmap avatar;

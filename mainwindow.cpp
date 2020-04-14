@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->widget->setDataDirAndLoad(QApplication::applicationDirPath() + "/data/dialogue");
 }
 
 MainWindow::~MainWindow()
