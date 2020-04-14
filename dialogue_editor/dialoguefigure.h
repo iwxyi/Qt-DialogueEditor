@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QPixmap>
 #include <QStringList>
+#include "dialoguebucket.h"
 
 class DialogueFigure : public QObject
 {
@@ -15,11 +16,14 @@ signals:
 
 public slots:
 
-protected:
+public:
     bool is_self = false; // 是否在右边
+    QString figure_id;
+    ChatType type;
     QString nickname;
+    QString said;
     QPixmap avatar;
-    QString avatar_qss, chat_qss; // 样式表
+    QString qss; // 各种样式表
 };
 
 #endif // DIALOGUEFIGURE_H

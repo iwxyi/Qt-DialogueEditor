@@ -44,6 +44,7 @@ void DialogueGroup::initView()
     connect(left_button, SIGNAL(clicked()), this, SLOT(slotAddLeftChat()));
     connect(mid_button, SIGNAL(clicked()), this, SLOT(slotAddNarrator()));
     connect(right_button, SIGNAL(clicked()), this, SLOT(slotAddRightChat()));
+
     connect(dialogues_list_widget, &QListWidget::currentRowChanged, this, [=](int row){
         if (row == -1 || row > dialogues_list_widget->count())
         {
@@ -54,6 +55,8 @@ void DialogueGroup::initView()
         editor->setBucket(bucket);
     });
     connect(dialogues_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotListMenuShowed(QPoint)));
+
+    connect(editor, SIGNAL(signalSaveFigure(DialogueBucket*)), this, SLOT(slotSaveFigure(DialogueBucket*)));
 }
 
 void DialogueGroup::initStyle()
@@ -154,6 +157,24 @@ void DialogueGroup::slotListMenuShowed(QPoint)
     menu->exec(QCursor::pos());
 
     menu->deleteLater();
+}
+
+void DialogueGroup::slotSaveFigure(DialogueBucket *bucket)
+{
+    manager->saveFigure(bucket);
+    refreshFigures();
+}
+
+void DialogueGroup::refreshFigures()
+{
+    figure_list_widget->clear();
+    auto figures = manager->getFigures();
+    for (int i = 0; i < figures.size(); i++)
+    {
+        auto figure = figures.at(i);
+        QListWidgetItem* item = new QListWidgetItem(figure->avatar, figure->nickname);
+        figure_list_widget->addItem(item);
+    }
 }
 
 void DialogueGroup::actionInsertLeftChat()

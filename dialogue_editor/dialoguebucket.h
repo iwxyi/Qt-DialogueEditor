@@ -26,6 +26,7 @@ class DialogueBucket : public QWidget
 {
     Q_OBJECT
     friend class DialogueEditor;
+    friend class DialogueManager;
 public:
     DialogueBucket(ChatType type, QString name, QPixmap avatar, QString said, QWidget *parent = nullptr);
     DialogueBucket(QString narr, QWidget *parent = nullptr);
@@ -41,15 +42,17 @@ public:
     static QString getDefaultChatStyleSheet();
     static QString getDefaultNarratorStyleSheet();
 
+    QString getName();
+
 signals:
     void signalBubbleChanged();
 
 public slots:
 
-private:
+protected:
     ChatType type = SelfChat;
-
-    DialogueNickname *figure = nullptr; // 姓名
+    QString figure_id; // 角色的id
+    DialogueNickname *nickname = nullptr; // 姓名
     DialogueAvatar *avatar = nullptr; // 头像
     DialogueBubble *bubble = nullptr; // 气泡
     DialogueNarrator *narrator = nullptr; // 旁白

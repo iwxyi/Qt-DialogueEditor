@@ -20,7 +20,7 @@ void DialogueEditor::initView()
     name_check = new QCheckBox("显示名字", this);
     delete_bucket_button = new QPushButton("删除此行", this);
     export_picture_button = new QPushButton("导出图片", this);
-    export_text_button = new QPushButton("导出文字", this);
+    save_figure_button = new QPushButton("保存角色", this);
 
     QVBoxLayout *vlayout = new QVBoxLayout(this);
     vlayout->addWidget(avatar_label);
@@ -32,9 +32,9 @@ void DialogueEditor::initView()
     vlayout->addWidget(style_edit);
     vlayout->addWidget(name_check);
     QHBoxLayout *button_hlayout = new QHBoxLayout;
+    button_hlayout->addWidget(save_figure_button);
     button_hlayout->addWidget(delete_bucket_button);
     button_hlayout->addWidget(export_picture_button);
-    button_hlayout->addWidget(export_text_button);
     vlayout->addLayout(button_hlayout);
 
     vlayout->setMargin(0);
@@ -42,7 +42,7 @@ void DialogueEditor::initView()
     connect(name_edit, &QLineEdit::textEdited, this, [=]{
         if (!current_bucket)
             return ;
-        current_bucket->figure->setText(name_edit->text());
+        current_bucket->nickname->setText(name_edit->text());
     });
     connect(said_edit, &QPlainTextEdit::textChanged, this, [=]{
        if (!current_bucket)
@@ -68,11 +68,11 @@ void DialogueEditor::initView()
     connect(delete_bucket_button, &QPushButton::clicked, this, [=]{
         emit signalDelete();
     });
+    connect(save_figure_button, &QPushButton::clicked, this, [=]{
+        emit signalSaveFigure(current_bucket);
+    });
     connect(export_picture_button, &QPushButton::clicked, this, [=]{
         emit signalExportPicture();
-    });
-    connect(export_text_button, &QPushButton::clicked, this, [=]{
-        emit signalExportText();
     });
 }
 
@@ -122,7 +122,7 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         delete_bucket_button->setEnabled(true);
 
         avatar_label->setPixmap(*bucket->avatar->pixmap());
-        name_edit->setText(bucket->figure->text());
+        name_edit->setText(bucket->nickname->text());
         said_edit->setPlainText(bucket->bubble->text());
     }
 }

@@ -27,7 +27,7 @@ public:
 signals:
     void signalDelete();
     void signalExportPicture();
-    void signalExportText();
+    void signalSaveFigure(DialogueBucket* bucket);
 
 public slots:
 
@@ -40,8 +40,8 @@ private:
     QLineEdit *name_edit;
     QCheckBox *name_check;
 
+    QPushButton *save_figure_button;
     QPushButton *export_picture_button;
-    QPushButton *export_text_button;
     QPushButton *delete_bucket_button;
 };
 

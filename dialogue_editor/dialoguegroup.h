@@ -44,6 +44,8 @@ public slots:
     void slotAddNarrator();
     void slotAddRightChat();
     void slotListMenuShowed(QPoint pos);
+    void slotSaveFigure(DialogueBucket* bucket);
+    void refreshFigures();
 
     void actionInsertLeftChat();
     void actionInsertNarrator();

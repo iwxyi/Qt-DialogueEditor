@@ -23,7 +23,7 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     QVBoxLayout* vlayout = new QVBoxLayout;
     QVBoxLayout* alayout = new QVBoxLayout;
     avatar = new DialogueAvatar(ava, this);
-    figure = new DialogueNickname(name, this);
+    nickname = new DialogueNickname(name, this);
     bubble = new DialogueBubble(said, this);
 
     alayout->addWidget(avatar);
@@ -45,12 +45,12 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
         hlayout->addLayout(alayout);
 
         flayout->addStretch(1);
-        flayout->addWidget(figure);
+        flayout->addWidget(nickname);
         blayout->addStretch(1);
         blayout->addWidget(bubble);
 
         hlayout->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        figure->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        nickname->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     }
     else // 对方说的话，靠左对齐
     {
@@ -58,7 +58,7 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
         hlayout->addLayout(vlayout);
         hlayout->addSpacing(64);
 
-        flayout->addWidget(figure);
+        flayout->addWidget(nickname);
         flayout->addStretch(1);
         blayout->addWidget(bubble);
         blayout->addStretch(1);
@@ -90,7 +90,7 @@ bool DialogueBucket::isNarrator()
 
 void DialogueBucket::setNameVisible(bool visible)
 {
-    figure->setVisible(visible);
+    nickname->setVisible(visible);
 }
 
 QString DialogueBucket::getDefaultChatStyleSheet()
@@ -107,4 +107,12 @@ QString DialogueBucket::getDefaultNarratorStyleSheet()
     file.open(QFile::ReadOnly);
     QTextStream in(&file);
     return in.readAll();
+}
+
+QString DialogueBucket::getName()
+{
+    if (type == ChatType::NarrChat)
+        return "";
+    else
+        return nickname->text();
 }
