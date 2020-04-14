@@ -35,8 +35,8 @@ public:
     void setDataDirAndLoad(QString dir);
 
 private:
-    void insertBucketAndSetQSS(QListWidgetItem *item, DialogueBucket* bucket, QString qss = "");
-    void insertBucketAndSetQSS(int row, DialogueBucket* bucket, QString qss = "");
+    void insertBucketAndSetQSS(QListWidgetItem *item, DialogueBucket* bucket, QString qss = "", bool above = false);
+    void insertBucketAndSetQSS(int row, DialogueBucket* bucket, QString qss = "", bool above = false);
 
 protected:
     void resizeEvent(QResizeEvent* event);

@@ -62,12 +62,18 @@ void DialogueManager::saveFigure(DialogueBucket *bucket)
     if (!figure) // 没有相同ID，尝试按名字查找
         figure = bucket->isNarrator() ? nullptr : getFigureByName(bucket->getName());
     if (!figure) // 如果没有对应的角色模板，则创建
-        figure = createFigure(bucket->type, bucket->nickname->text(), *bucket->avatar->pixmap(), bucket->styleSheet());
+        figure = bucket->isNarrator()
+                ? createFigure(bucket->type, bucket->styleSheet())
+                : createFigure(bucket->type, bucket->nickname->text(), *bucket->avatar->pixmap(), bucket->styleSheet());
     else // 更新模板
     {
+        qDebug() << "saave";
         figure->type = bucket->type;
-        figure->nickname = bucket->getName();
-        figure->avatar = bucket->getAvatar();
+        if (figure->type != NarrChat)
+        {
+            figure->nickname = bucket->getName();
+            figure->avatar = bucket->getAvatar();
+        }
         figure->qss = bucket->styleSheet();
     }
     // 保存figure
@@ -111,6 +117,17 @@ DialogueFigure *DialogueManager::createFigure(ChatType t, QString n, QPixmap a, 
     figure->type = t;
     figure->nickname = n;
     figure->avatar = a;
+    figure->qss = ss;
+    figures.append(figure);
+    return figure;
+}
+
+DialogueFigure *DialogueManager::createFigure(ChatType t, QString ss)
+{
+    auto figure = new DialogueFigure(this);
+    figure->figure_id = createFigureID();
+    figure->type = t;
+    figure->nickname = "[旁白]";
     figure->qss = ss;
     figures.append(figure);
     return figure;

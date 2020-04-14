@@ -11,16 +11,11 @@
 #include <QHBoxLayout>
 #include <QFile>
 #include <QTextStream>
+#include "dialoguechattype.h"
 #include "dialogueavatar.h"
 #include "dialoguenickname.h"
 #include "dialoguebubble.h"
 #include "dialoguenarrator.h"
-
-enum ChatType {
-    SelfChat, // 自己说的（右边）
-    OppoChat, // 对方说的（左边）
-    NarrChat, // 旁白文字（中间）
-};
 
 class DialogueBucket : public QWidget
 {

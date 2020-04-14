@@ -183,7 +183,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
 
     QMenu* menu = new QMenu("菜单");
     QAction* insert_dialogue_action = new QAction("添加该角色对话", this);
-    QAction* select_all_dialogue_action = new QAction("选中该角色所有对话", this);
+    QAction* select_all_dialogue_action = new QAction("更新选中角色所有对话", this);
     QAction* figure_update_all_action = new QAction("套用样式至该角色所有对话", this);
     QAction* figure_update_select_action = new QAction("套用样式至选中对话", this);
     QAction* move_up_action = new QAction("上移", this);
@@ -209,6 +209,11 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveDown()));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(actionFigureDelete()));
 
+    if (figure_list_widget->selectedItems().size() > 1)
+    {
+        figure_update_select_action->setEnabled(false);
+    }
+
     menu->exec(QCursor::pos());
 
     menu->deleteLater();
@@ -233,7 +238,8 @@ void DialogueGroup::slotInsertFromFigure(DialogueFigure *figure)
             insertBucketAndSetQSS(
                 item,
                 new DialogueBucket("旁白", this),
-                figure->qss
+                figure->qss,
+                true
             );
         }
     }
@@ -244,22 +250,30 @@ void DialogueGroup::slotInsertFromFigure(DialogueFigure *figure)
             insertBucketAndSetQSS(
                 item,
                 new DialogueBucket(figure->type, figure->nickname, figure->avatar, "说的话", this),
-                figure->qss
+                figure->qss,
+                true
             );
         }
     }
 }
 
-void DialogueGroup::insertBucketAndSetQSS(QListWidgetItem* item, DialogueBucket *bucket, QString qss)
+void DialogueGroup::insertBucketAndSetQSS(QListWidgetItem* item, DialogueBucket *bucket, QString qss, bool above)
 {
     int row = (item == nullptr ? -1 : dialogues_list_widget->row(item));
-    insertBucketAndSetQSS(row, bucket, qss);
+    insertBucketAndSetQSS(row, bucket, qss, above);
 }
 
-void DialogueGroup::insertBucketAndSetQSS(int row, DialogueBucket *bucket, QString qss)
+void DialogueGroup::insertBucketAndSetQSS(int row, DialogueBucket *bucket, QString qss, bool above)
 {
     if (!qss.isEmpty())
         bucket->setStyleSheet(qss);
+    if (above)
+    {
+        if (row == -1)
+            row = -2; // 保持插入在最后面
+        else // 插入到下一项
+            row = row + 1;
+    }
     dialogues_list_widget->setCurrentItem(addChat(bucket, row));
 }
 
@@ -362,12 +376,49 @@ void DialogueGroup::actionChatDelete()
 
 void DialogueGroup::actionInsertFigureDialogue()
 {
+    auto items = figure_list_widget->selectedItems();
+    auto figures = manager->getFigures();
+    for (int i = 0; i < items.size(); i++)
+    {
+        auto figure = figures.at(i);
+        // 遍历插入选中项
 
+    }
 }
 
 void DialogueGroup::actionSelectFigureDialogue()
 {
-
+    auto items = figure_list_widget->selectedItems();
+    auto figures = manager->getFigures();
+    dialogues_list_widget->clearSelection();
+    for (int i = 0; i < items.size(); i++)
+    {
+        auto figure = figures.at(i);
+        // 遍历插入选中项
+        if (figure->type == NarrChat)
+        {
+            // 选中所有旁白
+            for (int i = 0; i < buckets.size(); i++)
+            {
+                auto bucket = buckets.at(i);
+                if (bucket->isNarrator())
+                    dialogues_list_widget->setCurrentRow(i);
+            }
+        }
+        else
+        {
+            // 根据名字选择
+            QString name = figure->nickname;
+            if (name.isEmpty())
+                continue;
+            for (int i = 0; i < buckets.size(); i++)
+            {
+                auto bucket = buckets.at(i);
+                if (!bucket->isNarrator() && bucket->getName() == name)
+                    dialogues_list_widget->setCurrentRow(i);
+            }
+        }
+    }
 }
 
 void DialogueGroup::actionUpdateFigureDialogues()

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QPixmap>
 #include <QStringList>
-#include "dialoguebucket.h"
+#include "dialoguechattype.h"
 
 class DialogueFigure : public QObject
 {

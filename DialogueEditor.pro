@@ -35,6 +35,7 @@ HEADERS += \
     dialogue_editor/dialogueavatar.h \
     dialogue_editor/dialoguebubble.h \
     dialogue_editor/dialoguebucket.h \
+    dialogue_editor/dialoguechattype.h \
     dialogue_editor/dialogueeditor.h \
     dialogue_editor/dialoguefigure.h \
     dialogue_editor/dialoguegroup.h \

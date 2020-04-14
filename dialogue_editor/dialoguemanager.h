@@ -29,6 +29,7 @@ public:
 
 private:
     DialogueFigure* createFigure(ChatType t, QString n, QPixmap a, QString ss);
+    DialogueFigure* createFigure(ChatType t, QString ss);
     QString createFigureID();
 
 private:
