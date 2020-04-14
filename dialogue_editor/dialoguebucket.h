@@ -30,12 +30,13 @@ class DialogueBucket : public QWidget
 public:
     DialogueBucket(ChatType type, QString name, QPixmap avatar, QString said, QWidget *parent = nullptr);
     DialogueBucket(QString narr, QWidget *parent = nullptr);
+    DialogueBucket(const DialogueBucket* b);
 
     void initView(QString name, QPixmap ava, QString said);
     void initView(QString narr);
 
     bool isSelf();
-    bool isNarrator();
+    bool isNarrator() const;
 
     void setNameVisible(bool visible);
 

@@ -17,6 +17,23 @@ DialogueBucket::DialogueBucket(QString narr, QWidget *parent) : QWidget(parent)
     initView(narr);
 }
 
+DialogueBucket::DialogueBucket(const DialogueBucket *b)
+{
+    setObjectName("DialogueBucket");
+
+    figure_id = b->figure_id;
+    type = b->type;
+
+    if (b->isNarrator())
+    {
+        initView(b->narrator->text());
+    }
+    else
+    {
+        initView(b->nickname->text(), *b->avatar->pixmap(), b->bubble->text());
+    }
+}
+
 void DialogueBucket::initView(QString name, QPixmap ava, QString said)
 {
     QHBoxLayout* hlayout = new QHBoxLayout(this);
@@ -83,7 +100,7 @@ bool DialogueBucket::isSelf()
     return type == SelfChat;
 }
 
-bool DialogueBucket::isNarrator()
+bool DialogueBucket::isNarrator() const
 {
     return type == NarrChat;
 }

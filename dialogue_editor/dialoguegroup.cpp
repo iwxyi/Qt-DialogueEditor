@@ -44,7 +44,7 @@ void DialogueGroup::initView()
     dialogues_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     figure_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
     figure_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    figure_list_widget->setToolTip("角色模板，双击插入该角色至对话框");
+    figure_list_widget->setToolTip("角色模板，双击插入该角色至对话框\n通过最右边“保存角色”创建");
 
     connect(left_button, SIGNAL(clicked()), this, SLOT(slotAddLeftChat()));
     connect(mid_button, SIGNAL(clicked()), this, SLOT(slotAddNarrator()));
@@ -63,7 +63,7 @@ void DialogueGroup::initView()
         int row = index.row();
         editor->focusSaid();
     });
-    connect(dialogues_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotListMenuShowed(QPoint)));
+    connect(dialogues_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotDialogueMenuShowed(QPoint)));
 
     connect(editor, SIGNAL(signalSaveFigure(DialogueBucket*)), this, SLOT(slotSaveFigure(DialogueBucket*)));
 
@@ -72,6 +72,7 @@ void DialogueGroup::initView()
         auto figure = manager->getFigures().at(row);
         slotInsertFromFigure(figure);
     });
+    connect(figure_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotFigureMenuShowed(QPoint)));
 }
 
 void DialogueGroup::initStyle()
@@ -141,7 +142,7 @@ void DialogueGroup::slotAddRightChat()
     dialogues_list_widget->setFocus();
 }
 
-void DialogueGroup::slotListMenuShowed(QPoint)
+void DialogueGroup::slotDialogueMenuShowed(QPoint)
 {
     if (!dialogues_list_widget->currentIndex().isValid())
         return ;
@@ -168,6 +169,44 @@ void DialogueGroup::slotListMenuShowed(QPoint)
     connect(move_up_action, SIGNAL(triggered()), this, SLOT(actionChatMoveUp()));
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionChatMoveDown()));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(actionChatDelete()));
+
+    menu->exec(QCursor::pos());
+
+    menu->deleteLater();
+}
+
+void DialogueGroup::slotFigureMenuShowed(QPoint pos)
+{
+    if (!figure_list_widget->currentIndex().isValid())
+        return;
+
+    QMenu* menu = new QMenu("菜单");
+    QAction* insert_dialogue_action = new QAction("添加该角色对话", this);
+    QAction* select_all_dialogue_action = new QAction("选中该角色所有对话", this);
+    QAction* figure_update_all_action = new QAction("套用样式至该角色所有对话", this);
+    QAction* figure_update_select_action = new QAction("套用样式至选中对话", this);
+    QAction* move_up_action = new QAction("上移", this);
+    QAction* move_down_action = new QAction("下移", this);
+    QAction* delete_action = new QAction("删除", this);
+
+    menu->addAction(insert_dialogue_action);
+    menu->addAction(select_all_dialogue_action);
+    menu->addSeparator();
+    menu->addAction(figure_update_all_action);
+    menu->addAction(figure_update_select_action);
+    menu->addSeparator();
+    menu->addAction(move_up_action);
+    menu->addAction(move_down_action);
+    menu->addSeparator();
+    menu->addAction(delete_action);
+
+    connect(insert_dialogue_action, SIGNAL(triggered()), this, SLOT(actionInsertFigureDialogue()));
+    connect(select_all_dialogue_action, SIGNAL(triggered()), this, SLOT(actionSelectFigureDialogue()));
+    connect(figure_update_all_action, SIGNAL(triggered()), this, SLOT(actionUpdateFigureDialogues()));
+    connect(figure_update_select_action, SIGNAL(triggered()), this, SLOT(actionUpdateSelectedDialogues()));
+    connect(move_up_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveUp()));
+    connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveDown()));
+    connect(delete_action, SIGNAL(triggered()), this, SLOT(actionFigureDelete()));
 
     menu->exec(QCursor::pos());
 
@@ -213,6 +252,11 @@ void DialogueGroup::slotInsertFromFigure(DialogueFigure *figure)
 void DialogueGroup::insertBucketAndSetQSS(QListWidgetItem* item, DialogueBucket *bucket, QString qss)
 {
     int row = (item == nullptr ? -1 : dialogues_list_widget->row(item));
+    insertBucketAndSetQSS(row, bucket, qss);
+}
+
+void DialogueGroup::insertBucketAndSetQSS(int row, DialogueBucket *bucket, QString qss)
+{
     if (!qss.isEmpty())
         bucket->setStyleSheet(qss);
     dialogues_list_widget->setCurrentItem(addChat(bucket, row));
@@ -275,30 +319,27 @@ void DialogueGroup::actionChatMoveUp()
         if (row <= 0)
             continue;
         auto item = dialogues_list_widget->takeItem(row);
-        auto widget = static_cast<DialogueBucket*>(dialogues_list_widget->itemWidget(item));
-        dialogues_list_widget->insertItem(row-1, item);
-        dialogues_list_widget->setItemWidget(item, widget);
-
-        buckets.takeAt(row);
-        buckets.insert(row-1, widget);
+        auto widget = buckets.takeAt(row);
+        insertBucketAndSetQSS(row-1, new DialogueBucket(widget), widget->styleSheet());
+        delete item;
+        delete widget;
     }
 }
 
 void DialogueGroup::actionChatMoveDown()
 {
     auto items = dialogues_list_widget->selectedItems();
+    dialogues_list_widget->clearSelection();
     for (int i = items.size()-1; i >= 0; i--) // 倒着来
     {
         int row = dialogues_list_widget->row(items.at(i));
         if (row >= dialogues_list_widget->count()-1)
             continue;
         auto item = dialogues_list_widget->takeItem(row);
-        auto widget = static_cast<DialogueBucket*>(dialogues_list_widget->itemWidget(item));
-        dialogues_list_widget->insertItem(row-1, item);
-        dialogues_list_widget->setItemWidget(item, widget);
-
-        buckets.takeAt(row);
-        buckets.insert(row+1, widget);
+        auto widget = buckets.takeAt(row);
+        insertBucketAndSetQSS(row+1, new DialogueBucket(widget), widget->styleSheet());
+        delete item;
+        delete widget;
     }
 }
 
@@ -316,6 +357,70 @@ void DialogueGroup::actionChatDelete()
         delete item;
         delete widget;
     }
+}
+
+void DialogueGroup::actionInsertFigureDialogue()
+{
+
+}
+
+void DialogueGroup::actionSelectFigureDialogue()
+{
+
+}
+
+void DialogueGroup::actionUpdateFigureDialogues()
+{
+
+}
+
+void DialogueGroup::actionUpdateSelectedDialogues()
+{
+
+}
+
+void DialogueGroup::actionFigureMoveUp()
+{
+    auto items = figure_list_widget->selectedItems();
+    auto figures = manager->getFigures();
+    for (int i = 0; i < items.size(); i++)
+    {
+        int row = figure_list_widget->row(items.at(i));
+        if (row <= 0)
+            continue;
+        auto figure = figures.takeAt(row);
+        figures.insert(row-1, figure);
+    }
+    refreshFigures();
+}
+
+void DialogueGroup::actionFigureMoveDown()
+{
+    auto items = figure_list_widget->selectedItems();
+    auto figures = manager->getFigures();
+    for (int i = items.size()-1; i >= 0; i--) // 倒着来
+    {
+        int row = figure_list_widget->row(items.at(i));
+        if (row >= figures.size()-1)
+            continue;
+        auto figure = figures.takeAt(row);
+        figures.insert(row+1, figure);
+    }
+    refreshFigures();
+}
+
+void DialogueGroup::actionFigureDelete()
+{
+    auto items = figure_list_widget->selectedItems();
+    auto figures = manager->getFigures();
+    for (int i = 0; i < items.size(); i++)
+    {
+        int row = figure_list_widget->row(items.at(i));
+        if (row < 0)
+            continue;
+        figures.removeAt(row);
+    }
+    refreshFigures();
 }
 
 QListWidgetItem* DialogueGroup::addChat(DialogueBucket *bucket, int row)

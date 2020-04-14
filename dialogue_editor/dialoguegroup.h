@@ -36,6 +36,7 @@ public:
 
 private:
     void insertBucketAndSetQSS(QListWidgetItem *item, DialogueBucket* bucket, QString qss = "");
+    void insertBucketAndSetQSS(int row, DialogueBucket* bucket, QString qss = "");
 
 protected:
     void resizeEvent(QResizeEvent* event);
@@ -46,7 +47,8 @@ public slots:
     void slotAddLeftChat();
     void slotAddNarrator();
     void slotAddRightChat();
-    void slotListMenuShowed(QPoint pos);
+    void slotDialogueMenuShowed(QPoint pos);
+    void slotFigureMenuShowed(QPoint pos);
     void slotSaveFigure(DialogueBucket* bucket);
     void slotInsertFromFigure(DialogueFigure* figure);
     void refreshFigures();
@@ -57,6 +59,14 @@ public slots:
     void actionChatMoveUp();
     void actionChatMoveDown();
     void actionChatDelete();
+
+    void actionInsertFigureDialogue();
+    void actionSelectFigureDialogue();
+    void actionUpdateFigureDialogues();
+    void actionUpdateSelectedDialogues();
+    void actionFigureMoveUp();
+    void actionFigureMoveDown();
+    void actionFigureDelete();
 
 private:
     QListWidgetItem *addChat(DialogueBucket* bucket, int row = -1);
