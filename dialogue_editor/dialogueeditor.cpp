@@ -92,6 +92,7 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         style_label->setEnabled(false);
         style_edit->setEnabled(false);
         name_check->setEnabled(false);
+        save_figure_button->setEnabled(false);
         delete_bucket_button->setEnabled(false);
         return ;
     }
@@ -106,6 +107,7 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         style_label->setEnabled(true);
         style_edit->setEnabled(true);
         name_check->setEnabled(false);
+        save_figure_button->setEnabled(true);
         delete_bucket_button->setEnabled(false);
 
         said_edit->setPlainText(bucket->narrator->text());
@@ -119,6 +121,7 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         style_label->setEnabled(true);
         style_edit->setEnabled(true);
         name_check->setEnabled(true);
+        save_figure_button->setEnabled(true);
         delete_bucket_button->setEnabled(true);
 
         avatar_label->setPixmap(*bucket->avatar->pixmap());

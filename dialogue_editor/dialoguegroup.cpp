@@ -34,6 +34,10 @@ void DialogueGroup::initView()
     main_hlayout->addLayout(list_vlayout);
     main_hlayout->addWidget(editor);
 
+    main_hlayout->setStretch(0, 1);
+    main_hlayout->setStretch(1, 2);
+    main_hlayout->setStretch(2, 2);
+
     dialogues_list_widget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     dialogues_list_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     dialogues_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -57,6 +61,12 @@ void DialogueGroup::initView()
     connect(dialogues_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotListMenuShowed(QPoint)));
 
     connect(editor, SIGNAL(signalSaveFigure(DialogueBucket*)), this, SLOT(slotSaveFigure(DialogueBucket*)));
+
+    connect(figure_list_widget, &QListWidget::doubleClicked, this, [=](const QModelIndex& index) {
+        int row = index.row();
+        auto figure = manager->getFigures().at(row);
+        slotInsertFromFigure(figure);
+    });
 }
 
 void DialogueGroup::initStyle()
@@ -161,8 +171,46 @@ void DialogueGroup::slotListMenuShowed(QPoint)
 
 void DialogueGroup::slotSaveFigure(DialogueBucket *bucket)
 {
+    if (bucket == nullptr)
+        return ;
     manager->saveFigure(bucket);
     refreshFigures();
+}
+
+void DialogueGroup::slotInsertFromFigure(DialogueFigure *figure)
+{
+    auto items = dialogues_list_widget->selectedItems();
+    dialogues_list_widget->clearSelection();
+    if (figure->type == ChatType::NarrChat)
+    {
+        foreach (auto item, items)
+        {
+            insertBucketAndSetQSS(
+                item,
+                new DialogueBucket("旁白", this),
+                figure->qss
+            );
+        }
+    }
+    else
+    {
+        foreach (auto item, items)
+        {
+            insertBucketAndSetQSS(
+                item,
+                new DialogueBucket(figure->type, figure->nickname, figure->avatar, "说的话", this),
+                figure->qss
+            );
+        }
+    }
+}
+
+void DialogueGroup::insertBucketAndSetQSS(QListWidgetItem* item, DialogueBucket *bucket, QString qss)
+{
+    int row = (item == nullptr ? -1 : dialogues_list_widget->row(item));
+    if (!qss.isEmpty())
+        bucket->setStyleSheet(qss);
+    dialogues_list_widget->setCurrentItem(addChat(bucket, row));
 }
 
 void DialogueGroup::refreshFigures()
@@ -183,11 +231,9 @@ void DialogueGroup::actionInsertLeftChat()
     dialogues_list_widget->clearSelection();
     foreach (auto item, items)
     {
-        int row = dialogues_list_widget->row(item);
-        auto bucket = new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this);
-        bucket->setStyleSheet(DialogueBucket::getDefaultChatStyleSheet());
-        auto itm = addChat(bucket, row);
-        dialogues_list_widget->setCurrentItem(itm);
+        insertBucketAndSetQSS(item,
+                              new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this),
+                              DialogueBucket::getDefaultChatStyleSheet());
     }
 }
 
@@ -197,11 +243,8 @@ void DialogueGroup::actionInsertNarrator()
     dialogues_list_widget->clearSelection();
     foreach (auto item, items)
     {
-        int row = dialogues_list_widget->row(item);
-        auto bucket = new DialogueBucket("旁白", this);
-        bucket->setStyleSheet(DialogueBucket::getDefaultNarratorStyleSheet());
-        auto itm = addChat(bucket, row);
-        dialogues_list_widget->setCurrentItem(itm);
+        insertBucketAndSetQSS(item, new DialogueBucket("旁白", this),
+                              DialogueBucket::getDefaultNarratorStyleSheet());
     }
 }
 
@@ -211,12 +254,10 @@ void DialogueGroup::actionInsertRightChat()
     dialogues_list_widget->clearSelection();
     foreach (auto item, items)
     {
-        int row = dialogues_list_widget->row(item);
         auto bucket = new DialogueBucket(SelfChat, "我", QPixmap(":/avatars/boy_1"), "说的话", this);
-        bucket->setStyleSheet(DialogueBucket::getDefaultChatStyleSheet());
         bucket->setNameVisible(false);
-        auto itm = addChat(bucket, row);
-        dialogues_list_widget->setCurrentItem(itm);
+        insertBucketAndSetQSS(item, bucket,
+                              DialogueBucket::getDefaultChatStyleSheet());
     }
 }
 

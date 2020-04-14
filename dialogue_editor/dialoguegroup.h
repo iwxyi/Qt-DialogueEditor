@@ -34,6 +34,9 @@ public:
 
     void setDataDirAndLoad(QString dir);
 
+private:
+    void insertBucketAndSetQSS(QListWidgetItem *item, DialogueBucket* bucket, QString qss = "");
+
 protected:
     void resizeEvent(QResizeEvent* event);
 
@@ -45,6 +48,7 @@ public slots:
     void slotAddRightChat();
     void slotListMenuShowed(QPoint pos);
     void slotSaveFigure(DialogueBucket* bucket);
+    void slotInsertFromFigure(DialogueFigure* figure);
     void refreshFigures();
 
     void actionInsertLeftChat();
