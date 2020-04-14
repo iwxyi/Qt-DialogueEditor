@@ -211,6 +211,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
 
     if (figure_list_widget->selectedItems().size() > 1)
     {
+        insert_dialogue_action->setEnabled(false);
         figure_update_select_action->setEnabled(false);
     }
 
@@ -405,10 +406,13 @@ void DialogueGroup::actionInsertFigureDialogue()
     {
         auto figure = figures.at(i);
         // 遍历插入选中项
-
+        slotInsertFromFigure(figure);
     }
 }
 
+/**
+ * 选中该角色所有对话
+ */
 void DialogueGroup::actionSelectFigureDialogue()
 {
     auto items = figure_list_widget->selectedItems();
@@ -426,7 +430,9 @@ void DialogueGroup::actionSelectFigureDialogue()
             {
                 auto bucket = buckets.at(k);
                 if (bucket->isNarrator())
+                {
                     dialogues_list_widget->setCurrentRow(k, QItemSelectionModel::Select);
+                }
             }
         }
         else
@@ -447,14 +453,67 @@ void DialogueGroup::actionSelectFigureDialogue()
     }
 }
 
+/**
+ * 更新该角色对话样式为模板样式
+ * 可多选角色模板
+ */
 void DialogueGroup::actionUpdateFigureDialogues()
 {
-
+    auto items = figure_list_widget->selectedItems();
+    auto figures = manager->getFigures();
+    dialogues_list_widget->clearSelection();
+    for (int i = 0; i < items.size(); i++)
+    {
+        int row = figure_list_widget->row(items.at(i));
+        auto figure = figures.at(row); // 选中 角色
+        // 遍历插入选中项
+        if (figure->type == NarrChat)
+        {
+            // 选中所有旁白
+            for (int k = 0; k < buckets.size(); k++)
+            {
+                auto bucket = buckets.at(k);
+                if (bucket->isNarrator())
+                {
+                    bucket->setNarrator(figure->said);
+                }
+            }
+        }
+        else
+        {
+            // 根据名字选择
+            QString name = figure->nickname;
+            if (name.isEmpty())
+                continue;
+            for (int k = 0; k < buckets.size(); k++)
+            {
+                auto bucket = buckets.at(k);
+                if (!bucket->isNarrator() && bucket->getName() == name)
+                {
+                    bucket->setAvatar(figure->avatar);
+                    bucket->setStyleSheet(figure->qss);
+                }
+            }
+        }
+    }
 }
 
+/**
+ * 设置选中对话为该角色
+ * （对话、旁白 分开）
+ */
 void DialogueGroup::actionUpdateSelectedDialogues()
 {
-
+    auto figure = manager->getFigures().at(figure_list_widget->currentRow());
+    auto items = dialogues_list_widget->selectedItems();
+    foreach (auto item, items)
+    {
+        int row = dialogues_list_widget->row(item);
+        auto bucket = buckets.at(row);
+        bucket->setName(figure->nickname);
+        bucket->setAvatar(figure->avatar);
+        bucket->setStyleSheet(figure->qss);
+    }
 }
 
 void DialogueGroup::actionFigureMoveUp()

@@ -101,7 +101,6 @@ void DialogueManager::saveFigure(DialogueBucket *bucket)
                 : createFigure(bucket->type, bucket->nickname->text(), *bucket->avatar->pixmap(), bucket->styleSheet());
     else // 更新模板
     {
-        qDebug() << "saave";
         figure->type = bucket->type;
         if (figure->type != NarrChat)
         {

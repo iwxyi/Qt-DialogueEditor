@@ -138,3 +138,18 @@ QPixmap DialogueBucket::getAvatar()
 {
     return *avatar->pixmap();
 }
+
+void DialogueBucket::setName(QString name)
+{
+    nickname->setText(name);
+}
+
+void DialogueBucket::setAvatar(QPixmap pixmap)
+{
+    avatar->setPixmap(pixmap);
+}
+
+void DialogueBucket::setNarrator(QString narrator)
+{
+    this->narrator->setText(narrator);
+}

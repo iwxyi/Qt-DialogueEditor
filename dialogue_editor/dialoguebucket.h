@@ -41,6 +41,10 @@ public:
     QString getName();
     QPixmap getAvatar();
 
+    void setName(QString name);
+    void setAvatar(QPixmap pixmap);
+    void setNarrator(QString narrator);
+
 signals:
     void signalBubbleChanged();
 
