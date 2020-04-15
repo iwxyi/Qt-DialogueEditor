@@ -91,6 +91,8 @@ void DialogueGroup::initData()
 
 void DialogueGroup::setDataDirAndLoad(QString dir)
 {
+    data_dir = dir;
+
     manager->setDataDir(dir);
     manager->loadData();
     refreshFigures();
@@ -766,10 +768,14 @@ void DialogueGroup::actionFigureDelete()
 
 void DialogueGroup::slotSaveToFile()
 {
+    QSettings st(QDir(data_dir).absoluteFilePath("settings.ini"), QSettings::IniFormat, this);
+    QString r = st.value("recent/export_path", "").toString();
+
     QString path = QFileDialog::getSaveFileName(this, "保存对话", "对话",
                                                 "长图片 (*.png *.jpg);;纯文本文件 (*.txt);;JSON文件（带样式表） (*.json)");
     if (path.isEmpty())
         return ;
+    st.setValue("recent/export_path", path);
 
     if (path.endsWith(".png") || path.endsWith(".jpg")) // 导出图片
     {
@@ -777,7 +783,7 @@ void DialogueGroup::slotSaveToFile()
     }
     else if (path.endsWith(".txt")) // 导出纯文本
     {
-
+        DialogueManager::writeTextFile(path, toText());
     }
     else if (path.endsWith(".json")) // 导出JSON
     {

@@ -89,6 +89,8 @@ public slots:
     void slotLoadFromFile();
 
 private:
+    QString data_dir;
+
     QListWidget *dialogues_list_widget, *figure_list_widget;
     QPushButton *left_button, *mid_button, *right_button;
     DialogueEditor *editor;
