@@ -13,6 +13,7 @@
 #include <QPushButton>
 #include <QDebug>
 #include <QTimer>
+#include <QFileDialog>
 #include "dialoguebucket.h"
 
 class DialogueEditor : public QWidget
@@ -36,7 +37,7 @@ public slots:
 private:
     DialogueBucket* current_bucket = nullptr; // 正在编辑的 bucket
 
-    DialogueAvatar *avatar_label;
+    QPushButton *avatar_btn;
     QLabel *name_label, *said_label, *style_label;
     QPlainTextEdit *said_edit, *style_edit;
     QLineEdit *name_edit;

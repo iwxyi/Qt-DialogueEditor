@@ -10,7 +10,7 @@ DialogueEditor::DialogueEditor(QWidget *parent) : QWidget(parent)
 
 void DialogueEditor::initView()
 {
-    avatar_label = new DialogueAvatar(this);
+    avatar_btn = new QPushButton(this);
     name_label = new QLabel("名字", this);
     name_edit = new QLineEdit(this);
     said_label = new QLabel("说的话/旁白", this);
@@ -23,7 +23,7 @@ void DialogueEditor::initView()
     save_figure_button = new QPushButton("保存角色", this);
 
     QVBoxLayout *vlayout = new QVBoxLayout(this);
-    vlayout->addWidget(avatar_label);
+    vlayout->addWidget(avatar_btn);
     vlayout->addWidget(name_label);
     vlayout->addWidget(name_edit);
     vlayout->addWidget(said_label);
@@ -39,6 +39,15 @@ void DialogueEditor::initView()
 
     vlayout->setMargin(0);
 
+    connect(avatar_btn, &QPushButton::clicked, this, [=]{
+        QString path = QFileDialog::getOpenFileName(this, "选择头像", "", tr("Images (*.png *.xpm *.jpg)"));
+        if (path.isEmpty())
+            return ;
+        QPixmap pixmap(path);
+        avatar_btn->setIconSize(pixmap.size());
+        avatar_btn->setIcon(pixmap);
+        current_bucket->setAvatar(pixmap);
+    });
     connect(name_edit, &QLineEdit::textEdited, this, [=]{
         if (!current_bucket)
             return ;
@@ -124,7 +133,9 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         save_figure_button->setEnabled(true);
         delete_bucket_button->setEnabled(true);
 
-        avatar_label->setPixmap(*bucket->avatar->pixmap());
+        QPixmap pixmap = *bucket->avatar->pixmap();
+        avatar_btn->setIcon(QIcon(pixmap));
+        avatar_btn->setIconSize(pixmap.size());
         name_edit->setText(bucket->nickname->text());
         said_edit->setPlainText(bucket->bubble->text());
     }
