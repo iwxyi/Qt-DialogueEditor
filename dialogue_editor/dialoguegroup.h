@@ -18,6 +18,10 @@
 #include <QMenu>
 #include <QAction>
 #include <QMessageBox>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFileDialog>
 #include "dialoguebucket.h"
 #include "dialogueeditor.h"
 #include "dialoguemanager.h"
@@ -34,6 +38,11 @@ public:
     void initData();
 
     void setDataDirAndLoad(QString dir);
+    void fromText(QString path);
+    QString toText(QString path);
+    void fromJson(QJsonObject);
+    QJsonObject toJson();
+    QPixmap toPixmap();
 
 private:
     void insertBucketAndSetQSS(QListWidgetItem *item, DialogueBucket* bucket, QString qss = "", bool above = false);
@@ -68,6 +77,9 @@ public slots:
     void actionFigureMoveUp();
     void actionFigureMoveDown();
     void actionFigureDelete();
+
+    void slotSaveToFile();
+    void slotLoadFromFile();
 
 private:
     QListWidgetItem *addChat(DialogueBucket* bucket, int row = -1);

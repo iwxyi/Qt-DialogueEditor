@@ -19,7 +19,7 @@ void DialogueEditor::initView()
     style_edit = new QPlainTextEdit(this);
     name_check = new QCheckBox("显示名字", this);
     delete_bucket_button = new QPushButton("删除此行", this);
-    export_picture_button = new QPushButton("导出图片", this);
+    export_picture_button = new QPushButton("导出对话", this);
     save_figure_button = new QPushButton("保存角色", this);
 
     QVBoxLayout *vlayout = new QVBoxLayout(this);
@@ -72,7 +72,7 @@ void DialogueEditor::initView()
         emit signalSaveFigure(current_bucket);
     });
     connect(export_picture_button, &QPushButton::clicked, this, [=]{
-        emit signalExportPicture();
+        emit signalSaveToFile();
     });
 }
 

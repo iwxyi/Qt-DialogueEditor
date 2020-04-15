@@ -27,7 +27,7 @@ public:
 
 signals:
     void signalDelete();
-    void signalExportPicture();
+    void signalSaveToFile();
     void signalSaveFigure(DialogueBucket* bucket);
 
 public slots:

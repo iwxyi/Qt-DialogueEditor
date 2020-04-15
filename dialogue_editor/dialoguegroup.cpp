@@ -66,6 +66,7 @@ void DialogueGroup::initView()
     connect(dialogues_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotDialogueMenuShowed(QPoint)));
 
     connect(editor, SIGNAL(signalSaveFigure(DialogueBucket*)), this, SLOT(slotSaveFigure(DialogueBucket*)));
+    connect(editor, SIGNAL(signalSaveToFile()), this, SLOT(slotSaveToFile()));
 
     connect(figure_list_widget, &QListWidget::doubleClicked, this, [=](const QModelIndex& index) {
         int row = index.row();
@@ -90,6 +91,55 @@ void DialogueGroup::setDataDirAndLoad(QString dir)
     manager->setDataDir(dir);
     manager->loadData();
     refreshFigures();
+}
+
+void DialogueGroup::fromText(QString path)
+{
+
+}
+
+QString DialogueGroup::toText(QString path)
+{
+
+}
+
+void DialogueGroup::fromJson(QJsonObject)
+{
+
+}
+
+QJsonObject DialogueGroup::toJson()
+{
+
+}
+
+QPixmap DialogueGroup::toPixmap()
+{
+    dialogues_list_widget->clearSelection();
+    auto scrollBar = dialogues_list_widget->verticalScrollBar();
+    QSize size(dialogues_list_widget->contentsRect().width() - scrollBar->width(), scrollBar->maximum() + scrollBar->pageStep());
+    QPixmap pixmap(size);
+    pixmap.fill(Qt::transparent);
+
+    // 分页绘制
+    int page = 0; // 第几页
+    while (page * scrollBar->pageStep() <= size.height())
+    {
+        QRect rd_rect = dialogues_list_widget->contentsRect();
+        const int start_y = page * scrollBar->pageStep(); // 页顶
+        int end_y = (page+1) * scrollBar->pageStep();
+        if (end_y > size.height()) // 最后一页，不满一页
+        {
+            int t = start_y + (end_y - size.height());
+            rd_rect.setTop(t);
+            end_y = size.height();
+        }
+        scrollBar->setSliderPosition(start_y);
+        dialogues_list_widget->render(&pixmap, QPoint(0, start_y), rd_rect);
+        page++;
+    }
+
+    return pixmap;
 }
 
 void DialogueGroup::resizeEvent(QResizeEvent *event)
@@ -561,6 +611,32 @@ void DialogueGroup::actionFigureDelete()
     }
     manager->saveOrder();
     refreshFigures();
+}
+
+void DialogueGroup::slotSaveToFile()
+{
+    QString path = QFileDialog::getSaveFileName(this, "保存对话", "对话",
+                                                "长图片 (*.png *.jpg);;纯文本文件 (*.txt);;JSON文件（带样式表） (*.json)");
+    if (path.isEmpty())
+        return ;
+
+    if (path.endsWith(".png") || path.endsWith(".jpg")) // 导出图片
+    {
+        toPixmap().save(path);
+    }
+    else if (path.endsWith(".txt")) // 导出纯文本
+    {
+
+    }
+    else if (path.endsWith(".json")) // 导出JSON
+    {
+
+    }
+}
+
+void DialogueGroup::slotLoadFromFile()
+{
+
 }
 
 QListWidgetItem* DialogueGroup::addChat(DialogueBucket *bucket, int row)
