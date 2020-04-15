@@ -131,7 +131,7 @@ DialogueFigure *DialogueManager::getFigureByName(QString name)
 {
     foreach (auto figure, figures)
     {
-        if (figure->nickname == name)
+        if (figure->type != NarrChat && figure->nickname == name)
             return figure;
     }
     return nullptr;

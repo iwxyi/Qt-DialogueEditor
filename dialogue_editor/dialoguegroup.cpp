@@ -93,14 +93,92 @@ void DialogueGroup::setDataDirAndLoad(QString dir)
     refreshFigures();
 }
 
-void DialogueGroup::fromText(QString path)
+void DialogueGroup::fromText(QString full)
 {
+    QStringList paras = full.split("\n", QString::SkipEmptyParts);
+    foreach (auto para, paras)
+    {
+        para = para.trimmed();
+        if (para.isEmpty())
+            continue;
+        if (para.indexOf("“") == -1 && para.indexOf(":") == -1 && para.indexOf("：") == -1) // 是旁白
+        {
+            addChat(new DialogueBucket(para, this));
+        }
+        else // 是语言
+        {
+            QString name, said;
+            if (para.indexOf("“") != -1)
+            {
+                int l_pos = para.indexOf("“");
+                int r_pos = para.indexOf("”", l_pos+1);
+                if (r_pos == -1)
+                    r_pos = para.length();
+                name = para.mid(0, l_pos).trimmed();
+                said = para.mid(l_pos+1, r_pos-l_pos-1).trimmed();
+                if (name.endsWith("：") || name.endsWith(":"))
+                    name = name.left(name.length()-1);
+            }
+            else
+            {
+                int c_pos= para.indexOf("：");
+                if (c_pos == -1)
+                    c_pos = para.indexOf(":");
+                name = para.left(c_pos);
+                said = para.right(para.length() - c_pos - 1);
+            }
 
+            ChatType type = (name=="我") ? ChatType::SelfChat : ChatType::OppoChat;
+            QPixmap avatar = QPixmap(":/avatars/girl_1"); // TODO: 确保默认头像存在
+            QString style = DialogueBucket::getDefaultChatStyleSheet();
+
+            auto figure = manager->getFigureByName(name);
+            if (figure == nullptr) // 没有这个人，针对名字智能获取
+            {
+                QString temp = name;
+                const QStringList chopped = QString("道 说 问 讲").split(" ");
+                for (int i = 0; i < chopped.size(); i++)
+                {
+                    auto chop = chopped.at(i);
+                    if (name.endsWith(chop))
+                    {
+                        name = name.left(name.length() - chop.length());
+                        if ((figure = manager->getFigureByName(name)) != nullptr) // 有这个人名了
+                            break;
+                        i = 0; // 从头开始
+                    }
+                }
+            }
+            if (figure != nullptr)
+            {
+                type = figure->type;
+                avatar = figure->avatar;
+                style = figure->qss;
+            }
+            auto bucket = new DialogueBucket(type, name, avatar, said, this);
+            bucket->setStyleSheet(style);
+            addChat(bucket);
+        }
+    }
 }
 
-QString DialogueGroup::toText(QString path)
+QString DialogueGroup::toText(QString indent_blank, QString indent_line)
 {
-
+    QString full;
+    foreach (auto bucket, buckets)
+    {
+        if (bucket->isNarrator())
+        {
+            full += indent_blank + bucket->getSaid();
+        }
+        else
+        {
+            // 注意：可能说的话没有名字，这个直接没名字就行了
+            full += indent_blank + bucket->getName() + "：“" + bucket->getSaid() + "”";
+        }
+        full += indent_line;
+    }
+    return full;
 }
 
 void DialogueGroup::fromJson(QJsonObject)
@@ -204,6 +282,7 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
     QAction* insert_left_action = new QAction("插入左边", this);
     QAction* insert_narr_action = new QAction("插入旁白", this);
     QAction* insert_right_action = new QAction("插入右边", this);
+    QAction* paste_chat_action = new QAction("粘贴", this);
     QAction* move_up_action = new QAction("上移", this);
     QAction* move_down_action = new QAction("下移", this);
     QAction* delete_action = new QAction("删除", this);
@@ -211,6 +290,8 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
     menu->addAction(insert_left_action);
     menu->addAction(insert_narr_action);
     menu->addAction(insert_right_action);
+    menu->addSeparator();
+    menu->addAction(paste_chat_action);
     menu->addSeparator();
     menu->addAction(move_up_action);
     menu->addAction(move_down_action);
@@ -220,9 +301,15 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
     connect(insert_left_action, SIGNAL(triggered()), this, SLOT(actionInsertLeftChat()));
     connect(insert_narr_action, SIGNAL(triggered()), this, SLOT(actionInsertNarrator()));
     connect(insert_right_action, SIGNAL(triggered()), this, SLOT(actionInsertRightChat()));
+    connect(paste_chat_action, SIGNAL(triggered()), this, SLOT(actionPasteChat()));
     connect(move_up_action, SIGNAL(triggered()), this, SLOT(actionChatMoveUp()));
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionChatMoveDown()));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(actionChatDelete()));
+
+    if (QApplication::clipboard()->text().isEmpty())
+    {
+        paste_chat_action->setEnabled(false);
+    }
 
     menu->exec(QCursor::pos());
 
@@ -400,6 +487,14 @@ void DialogueGroup::actionInsertRightChat()
         insertBucketAndSetQSS(item, bucket,
                               DialogueBucket::getDefaultChatStyleSheet());
     }
+}
+
+void DialogueGroup::actionPasteChat()
+{
+    QString s = QApplication::clipboard()->text();
+    if (s.isEmpty())
+        return ;
+    fromText(s);
 }
 
 void DialogueGroup::actionChatMoveUp()
@@ -639,7 +734,25 @@ void DialogueGroup::slotSaveToFile()
 
 void DialogueGroup::slotLoadFromFile()
 {
+    QString path = QFileDialog::getOpenFileName(this, "打开对话文件", "",
+                                                tr("纯文本文件 (*.txt);;JSON文件（带样式表） (*.json)"));
+    if (path.isEmpty())
+        return ;
 
+    // 先清理掉原来的（从头导入）
+    dialogues_list_widget->clear();
+    foreach (auto bucket, buckets)
+        bucket->deleteLater();
+    buckets.clear();
+
+    if (path.endsWith(".txt")) // 纯文本
+    {
+        fromText(DialogueManager::readTextFile(path));
+    }
+    else
+    {
+//        fromJson();
+    }
 }
 
 QListWidgetItem* DialogueGroup::addChat(DialogueBucket *bucket, int row)

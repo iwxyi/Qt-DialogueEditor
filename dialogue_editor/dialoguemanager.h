@@ -33,7 +33,7 @@ private:
     DialogueFigure* createFigure(ChatType t, QString ss, QString id = "");
     QString createFigureID();
 
-private:
+public:
     static QString readTextFile(QString path);
 
     static bool writeTextFile(QString path, QString text);

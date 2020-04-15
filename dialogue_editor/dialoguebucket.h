@@ -40,6 +40,7 @@ public:
 
     QString getName();
     QPixmap getAvatar();
+    QString getSaid();
 
     void setName(QString name);
     void setAvatar(QPixmap pixmap);

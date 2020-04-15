@@ -22,6 +22,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFileDialog>
+#include <QClipboard>
 #include "dialoguebucket.h"
 #include "dialogueeditor.h"
 #include "dialoguemanager.h"
@@ -38,8 +39,8 @@ public:
     void initData();
 
     void setDataDirAndLoad(QString dir);
-    void fromText(QString path);
-    QString toText(QString path);
+    void fromText(QString full);
+    QString toText(QString indent_blank = "　　", QString indent_line = "\n\n");
     void fromJson(QJsonObject);
     QJsonObject toJson();
     QPixmap toPixmap();
@@ -47,6 +48,7 @@ public:
 private:
     void insertBucketAndSetQSS(QListWidgetItem *item, DialogueBucket* bucket, QString qss = "", bool above = false);
     void insertBucketAndSetQSS(int row, DialogueBucket* bucket, QString qss = "", bool above = false);
+    QListWidgetItem *addChat(DialogueBucket* bucket, int row = -1);
 
 protected:
     void resizeEvent(QResizeEvent* event);
@@ -66,6 +68,7 @@ public slots:
     void actionInsertLeftChat();
     void actionInsertNarrator();
     void actionInsertRightChat();
+    void actionPasteChat();
     void actionChatMoveUp();
     void actionChatMoveDown();
     void actionChatDelete();
@@ -80,9 +83,6 @@ public slots:
 
     void slotSaveToFile();
     void slotLoadFromFile();
-
-private:
-    QListWidgetItem *addChat(DialogueBucket* bucket, int row = -1);
 
 private:
     QListWidget *dialogues_list_widget, *figure_list_widget;
