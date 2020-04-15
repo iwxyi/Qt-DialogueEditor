@@ -44,7 +44,7 @@ void DialogueEditor::initView()
         if (path.isEmpty())
             return ;
         QPixmap pixmap(path);
-        avatar_btn->setIconSize(pixmap.size());
+        avatar_btn->setIconSize(getAvatarSize(pixmap.size()));
         avatar_btn->setIcon(pixmap);
         current_bucket->setAvatar(pixmap);
     });
@@ -135,10 +135,18 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
 
         QPixmap pixmap = *bucket->avatar->pixmap();
         avatar_btn->setIcon(QIcon(pixmap));
-        avatar_btn->setIconSize(pixmap.size());
+        avatar_btn->setIconSize(getAvatarSize(pixmap.size()));
         name_edit->setText(bucket->nickname->text());
         said_edit->setPlainText(bucket->bubble->text());
     }
+}
+
+QSize DialogueEditor::getAvatarSize(QSize size)
+{
+    return QSize(
+                qMin(64, size.width()),
+                qMin(64, size.height())
+                );
 }
 
 void DialogueEditor::focusSaid()

@@ -231,6 +231,15 @@ QPixmap DialogueGroup::toPixmap()
     return pixmap;
 }
 
+void DialogueGroup::setAvatarSize(int x)
+{
+    DialogueAvatar::avatar_size = x;
+    foreach (auto bucket, buckets)
+    {
+        bucket->setAvatarSize(x);
+    }
+}
+
 void DialogueGroup::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);

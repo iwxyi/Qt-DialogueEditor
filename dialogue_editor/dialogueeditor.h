@@ -26,6 +26,9 @@ public:
     void initStyle();
     void setBucket(DialogueBucket* bucket);
 
+private:
+    QSize getAvatarSize(QSize size);
+
 signals:
     void signalDelete();
     void signalSaveToFile();

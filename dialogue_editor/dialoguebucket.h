@@ -45,6 +45,7 @@ public:
     void setName(QString name);
     void setAvatar(QPixmap pixmap);
     void setNarrator(QString narrator);
+    void setAvatarSize(int x);
 
 signals:
     void signalBubbleChanged();

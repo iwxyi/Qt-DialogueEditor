@@ -161,3 +161,8 @@ void DialogueBucket::setNarrator(QString narrator)
 {
     this->narrator->setText(narrator);
 }
+
+void DialogueBucket::setAvatarSize(int x)
+{
+    avatar->setFixedSize(x, x);
+}
