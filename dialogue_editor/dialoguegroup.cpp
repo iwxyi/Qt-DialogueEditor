@@ -120,6 +120,8 @@ QPixmap DialogueGroup::toPixmap()
     QSize size(dialogues_list_widget->contentsRect().width() - scrollBar->width(), scrollBar->maximum() + scrollBar->pageStep());
     QPixmap pixmap(size);
     pixmap.fill(Qt::transparent);
+    auto focus = dialogues_list_widget->focusPolicy();
+    dialogues_list_widget->setFocusPolicy(Qt::NoFocus); // 避免鼠标悬浮
 
     // 分页绘制
     int page = 0; // 第几页
@@ -130,7 +132,7 @@ QPixmap DialogueGroup::toPixmap()
         int end_y = (page+1) * scrollBar->pageStep();
         if (end_y > size.height()) // 最后一页，不满一页
         {
-            int t = start_y + (end_y - size.height());
+            int t = rd_rect.top() + (end_y - size.height());
             rd_rect.setTop(t);
             end_y = size.height();
         }
@@ -138,6 +140,7 @@ QPixmap DialogueGroup::toPixmap()
         dialogues_list_widget->render(&pixmap, QPoint(0, start_y), rd_rect);
         page++;
     }
+    dialogues_list_widget->setFocusPolicy(focus);
 
     return pixmap;
 }
