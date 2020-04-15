@@ -40,6 +40,7 @@ public:
 
     void setDataDirAndLoad(QString dir);
     void fromText(QString full);
+    QString toText(QList<DialogueBucket *> buckets, QString indent_blank = "　　", QString indent_line = "\n\n");
     QString toText(QString indent_blank = "　　", QString indent_line = "\n\n");
     void fromJson(QJsonObject);
     QJsonObject toJson();
@@ -68,6 +69,7 @@ public slots:
     void actionInsertLeftChat();
     void actionInsertNarrator();
     void actionInsertRightChat();
+    void actionCopyChat();
     void actionPasteChat();
     void actionChatMoveUp();
     void actionChatMoveDown();

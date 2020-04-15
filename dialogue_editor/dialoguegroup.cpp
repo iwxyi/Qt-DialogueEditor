@@ -162,7 +162,7 @@ void DialogueGroup::fromText(QString full)
     }
 }
 
-QString DialogueGroup::toText(QString indent_blank, QString indent_line)
+QString DialogueGroup::toText(QList<DialogueBucket*> buckets, QString indent_blank, QString indent_line)
 {
     QString full;
     foreach (auto bucket, buckets)
@@ -179,6 +179,11 @@ QString DialogueGroup::toText(QString indent_blank, QString indent_line)
         full += indent_line;
     }
     return full;
+}
+
+QString DialogueGroup::toText(QString indent_blank, QString indent_line)
+{
+    return toText(buckets, indent_blank, indent_line);
 }
 
 void DialogueGroup::fromJson(QJsonObject)
@@ -276,12 +281,11 @@ void DialogueGroup::slotAddRightChat()
 
 void DialogueGroup::slotDialogueMenuShowed(QPoint)
 {
-    if (!dialogues_list_widget->currentIndex().isValid())
-        return ;
     QMenu* menu = new QMenu("菜单");
     QAction* insert_left_action = new QAction("插入左边", this);
     QAction* insert_narr_action = new QAction("插入旁白", this);
     QAction* insert_right_action = new QAction("插入右边", this);
+    QAction* copy_chat_action = new QAction("复制", this);
     QAction* paste_chat_action = new QAction("粘贴", this);
     QAction* move_up_action = new QAction("上移", this);
     QAction* move_down_action = new QAction("下移", this);
@@ -291,6 +295,7 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
     menu->addAction(insert_narr_action);
     menu->addAction(insert_right_action);
     menu->addSeparator();
+    menu->addAction(copy_chat_action);
     menu->addAction(paste_chat_action);
     menu->addSeparator();
     menu->addAction(move_up_action);
@@ -301,11 +306,22 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
     connect(insert_left_action, SIGNAL(triggered()), this, SLOT(actionInsertLeftChat()));
     connect(insert_narr_action, SIGNAL(triggered()), this, SLOT(actionInsertNarrator()));
     connect(insert_right_action, SIGNAL(triggered()), this, SLOT(actionInsertRightChat()));
+    connect(copy_chat_action, SIGNAL(triggered()), this, SLOT(actionCopyChat()));
     connect(paste_chat_action, SIGNAL(triggered()), this, SLOT(actionPasteChat()));
     connect(move_up_action, SIGNAL(triggered()), this, SLOT(actionChatMoveUp()));
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionChatMoveDown()));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(actionChatDelete()));
 
+    if (dialogues_list_widget->selectedItems().size() == 0)
+    {
+        insert_left_action->setEnabled(false);
+        insert_narr_action->setEnabled(false);
+        insert_right_action->setEnabled(false);
+        copy_chat_action->setEnabled(false);
+        move_up_action->setEnabled(false);
+        move_down_action->setEnabled(false);
+        delete_action->setEnabled(false);
+    }
     if (QApplication::clipboard()->text().isEmpty())
     {
         paste_chat_action->setEnabled(false);
@@ -318,9 +334,6 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
 
 void DialogueGroup::slotFigureMenuShowed(QPoint pos)
 {
-    if (!figure_list_widget->currentIndex().isValid())
-        return;
-
     QMenu* menu = new QMenu("菜单");
     QAction* insert_dialogue_action = new QAction("添加该角色对话", this);
     QAction* select_all_dialogue_action = new QAction("选中该角色所有对话", this);
@@ -349,6 +362,16 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveDown()));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(actionFigureDelete()));
 
+    if (figure_list_widget->selectedItems().size() == 0) // 没有选中
+    {
+        insert_dialogue_action->setEnabled(false);
+        select_all_dialogue_action->setEnabled(false);
+        figure_update_all_action->setEnabled(false);
+        figure_update_select_action->setEnabled(false);
+        move_up_action->setEnabled(false);
+        move_down_action->setEnabled(false);
+        delete_action->setEnabled(false);
+    }
     if (figure_list_widget->selectedItems().size() > 1)
     {
         insert_dialogue_action->setEnabled(false);
@@ -487,6 +510,21 @@ void DialogueGroup::actionInsertRightChat()
         insertBucketAndSetQSS(item, bucket,
                               DialogueBucket::getDefaultChatStyleSheet());
     }
+}
+
+void DialogueGroup::actionCopyChat()
+{
+    auto items = dialogues_list_widget->selectedItems();
+    QList<DialogueBucket*>widgets;
+    for (int i = 0; i < items.size(); i++)
+    {
+        int row = dialogues_list_widget->row(items.at(i));
+        if (row < 0)
+            continue;
+        auto widget = buckets.at(row);
+        widgets.append(widget);
+    }
+    QApplication::clipboard()->setText(toText(widgets));
 }
 
 void DialogueGroup::actionPasteChat()
