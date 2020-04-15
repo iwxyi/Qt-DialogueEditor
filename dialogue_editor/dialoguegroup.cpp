@@ -72,6 +72,9 @@ void DialogueGroup::initView()
         int row = index.row();
         auto figure = manager->getFigures().at(row);
         slotInsertFromFigure(figure);
+        dialogues_list_widget->setFocus();
+        if (dialogues_list_widget->selectedItems().size() == 1)
+            editor->focusSaid();
     });
     connect(figure_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotFigureMenuShowed(QPoint)));
 }
