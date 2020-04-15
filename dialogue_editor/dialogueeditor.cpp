@@ -40,9 +40,13 @@ void DialogueEditor::initView()
     vlayout->setMargin(0);
 
     connect(avatar_btn, &QPushButton::clicked, this, [=]{
-        QString path = QFileDialog::getOpenFileName(this, "选择头像", "", tr("Images (*.png *.xpm *.jpg)"));
+        QSettings st(QDir(data_dir).absoluteFilePath("settings.ini"), QSettings::IniFormat, this);
+        QString r = st.value("recent/avatar_path", "").toString();
+
+        QString path = QFileDialog::getOpenFileName(this, "选择头像", r, tr("Images (*.png *.xpm *.jpg)"));
         if (path.isEmpty())
             return ;
+        st.setValue("recent/avatar_path", path);
         QPixmap pixmap(path);
         avatar_btn->setIconSize(getAvatarSize(pixmap.size()));
         avatar_btn->setIcon(pixmap);
@@ -139,6 +143,11 @@ void DialogueEditor::setBucket(DialogueBucket *bucket)
         name_edit->setText(bucket->nickname->text());
         said_edit->setPlainText(bucket->bubble->text());
     }
+}
+
+void DialogueEditor::setDataDir(QString dir)
+{
+    this->data_dir = dir;
 }
 
 QSize DialogueEditor::getAvatarSize(QSize size)

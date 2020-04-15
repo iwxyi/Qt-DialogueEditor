@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QFileDialog>
+#include <QSettings>
 #include "dialoguebucket.h"
 
 class DialogueEditor : public QWidget
@@ -25,6 +26,8 @@ public:
     void initView();
     void initStyle();
     void setBucket(DialogueBucket* bucket);
+
+    void setDataDir(QString dir);
 
 private:
     QSize getAvatarSize(QSize size);
@@ -38,6 +41,7 @@ public slots:
     void focusSaid();
 
 private:
+    QString data_dir;
     DialogueBucket* current_bucket = nullptr; // 正在编辑的 bucket
 
     QPushButton *avatar_btn;

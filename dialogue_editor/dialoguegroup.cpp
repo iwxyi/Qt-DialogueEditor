@@ -94,6 +94,8 @@ void DialogueGroup::setDataDirAndLoad(QString dir)
     manager->setDataDir(dir);
     manager->loadData();
     refreshFigures();
+
+    editor->setDataDir(dir);
 }
 
 void DialogueGroup::fromText(QString full)
@@ -602,7 +604,8 @@ void DialogueGroup::actionInsertFigureDialogue()
     auto figures = manager->getFigures();
     for (int i = 0; i < items.size(); i++)
     {
-        auto figure = figures.at(i);
+        int row = figure_list_widget->row(items.at(i));
+        auto figure = figures.at(row);
         // 遍历插入选中项
         slotInsertFromFigure(figure);
     }
