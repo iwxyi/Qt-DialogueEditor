@@ -72,9 +72,10 @@ void DialogueGroup::initView()
         int row = index.row();
         auto figure = manager->getFigures().at(row);
         slotInsertFromFigure(figure);
-        dialogues_list_widget->setFocus();
         if (dialogues_list_widget->selectedItems().size() == 1)
             editor->focusSaid();
+        else
+            dialogues_list_widget->setFocus();
     });
     connect(figure_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotFigureMenuShowed(QPoint)));
 }
@@ -355,6 +356,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     QAction* select_all_dialogue_action = new QAction("选中该角色所有对话", this);
     QAction* figure_update_all_action = new QAction("套用样式至该角色所有对话", this);
     QAction* figure_update_select_action = new QAction("套用样式至选中对话", this);
+    QAction* figure_rename_action = new QAction("重命名该角色及对话", this);
     QAction* move_up_action = new QAction("上移", this);
     QAction* move_down_action = new QAction("下移", this);
     QAction* delete_action = new QAction("删除", this);
@@ -364,6 +366,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     menu->addSeparator();
     menu->addAction(figure_update_all_action);
     menu->addAction(figure_update_select_action);
+    menu->addAction(figure_rename_action);
     menu->addSeparator();
     menu->addAction(move_up_action);
     menu->addAction(move_down_action);
@@ -374,6 +377,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     connect(select_all_dialogue_action, SIGNAL(triggered()), this, SLOT(actionSelectFigureDialogue()));
     connect(figure_update_all_action, SIGNAL(triggered()), this, SLOT(actionUpdateFigureDialogues()));
     connect(figure_update_select_action, SIGNAL(triggered()), this, SLOT(actionUpdateSelectedDialogues()));
+    connect(figure_rename_action, SIGNAL(triggered()), this, SLOT(actionRenameFigureAndDialogues()));
     connect(move_up_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveUp()));
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveDown()));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(actionFigureDelete()));
@@ -384,14 +388,24 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
         select_all_dialogue_action->setEnabled(false);
         figure_update_all_action->setEnabled(false);
         figure_update_select_action->setEnabled(false);
+        figure_rename_action->setEnabled(false);
         move_up_action->setEnabled(false);
         move_down_action->setEnabled(false);
         delete_action->setEnabled(false);
     }
-    if (figure_list_widget->selectedItems().size() > 1)
+    else if (figure_list_widget->selectedItems().size() > 1) // 多选
     {
         insert_dialogue_action->setEnabled(false);
         figure_update_select_action->setEnabled(false);
+        figure_rename_action->setEnabled(false);
+    }
+    else // 单选
+    {
+        auto figure = manager->getFigures().at(figure_list_widget->currentRow());
+        if (figure->isNarrator()) // 是旁白
+        {
+            figure_rename_action->setEnabled(false);
+        }
     }
 
     menu->exec(QCursor::pos());
@@ -717,6 +731,45 @@ void DialogueGroup::actionUpdateSelectedDialogues()
         bucket->setAvatar(figure->avatar);
         bucket->setStyleSheet(figure->qss);
     }
+}
+
+/**
+ * 重命名窗口以及对话框中重名的对话
+ */
+void DialogueGroup::actionRenameFigureAndDialogues()
+{
+    auto figure = manager->getFigures().at(figure_list_widget->currentRow());
+    if (figure->isNarrator()) // 旁白不能重命名
+        return ;
+
+    // 输入姓名
+    QString new_name = QInputDialog::getText(this, "重命名角色模板及对话", "请输入新名字", QLineEdit::Normal, figure->nickname);
+    if (new_name.isEmpty() || new_name == figure->nickname)
+        return ;
+    if (manager->getFigureByName(new_name) != nullptr)
+    {
+        if (QMessageBox::warning(this, "提示", QString("已经存在【%1】的角色模板，是否依旧使用此名字？").arg(new_name), "放弃", "继续", nullptr, 0) != 1)
+            return ;
+    }
+    // 开始重命名
+    QString old_name = figure->nickname;
+    figure->nickname = new_name;
+    manager->saveData(figure);
+    dialogues_list_widget->clearSelection();
+    for (int i = 0; i < buckets.size(); i++)
+    {
+        auto bucket = buckets.at(i);
+        if (bucket->isNarrator())
+            continue;
+        if (bucket->getName() == old_name)
+        {
+            bucket->setName(new_name);
+            bucket->update();
+            dialogues_list_widget->setCurrentRow(i, QItemSelectionModel::Select);
+        }
+    }
+    refreshFigures();
+    dialogues_list_widget->setFocus(); // 要 setFocus 才会 实时更新
 }
 
 void DialogueGroup::actionFigureMoveUp()

@@ -23,6 +23,7 @@
 #include <QJsonArray>
 #include <QFileDialog>
 #include <QClipboard>
+#include <QInputDialog>
 #include "dialoguebucket.h"
 #include "dialogueeditor.h"
 #include "dialoguemanager.h"
@@ -81,6 +82,7 @@ public slots:
     void actionSelectFigureDialogue();
     void actionUpdateFigureDialogues();
     void actionUpdateSelectedDialogues();
+    void actionRenameFigureAndDialogues();
     void actionFigureMoveUp();
     void actionFigureMoveDown();
     void actionFigureDelete();

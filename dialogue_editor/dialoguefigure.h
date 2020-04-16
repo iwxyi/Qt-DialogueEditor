@@ -12,6 +12,8 @@ class DialogueFigure : public QObject
 public:
     DialogueFigure(QObject *parent = nullptr);
 
+    bool isNarrator();
+
 signals:
 
 public slots:
