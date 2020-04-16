@@ -5,7 +5,7 @@ DialogueEditor::DialogueEditor(QWidget *parent) : QWidget(parent)
     initView();
     initStyle();
 
-    setBucket(nullptr);
+    setBucket(QList<DialogueBucket*>{}, nullptr);
 }
 
 void DialogueEditor::initView()
@@ -50,39 +50,46 @@ void DialogueEditor::initView()
         QPixmap pixmap(path);
         avatar_btn->setIconSize(getAvatarSize(pixmap.size()));
         avatar_btn->setIcon(pixmap);
-        current_bucket->setAvatar(pixmap);
+        foreach (auto bucket, selected_buckets)
+            bucket->setAvatar(pixmap);
     });
     connect(name_edit, &QLineEdit::textEdited, this, [=]{
         if (!current_bucket)
             return ;
-        current_bucket->nickname->setText(name_edit->text());
+        foreach (auto bucket, selected_buckets)
+            bucket->nickname->setText(name_edit->text());
     });
     connect(said_edit, &QPlainTextEdit::textChanged, this, [=]{
-       if (!current_bucket)
-           return ;
-       QLabel* label = current_bucket->isNarrator()
-               ? (QLabel*)current_bucket->narrator
-               : (QLabel*)current_bucket->bubble;
-       label->setText(said_edit->toPlainText());
-       label->adjustSize();
-       emit current_bucket->signalBubbleChanged();
+        if (!current_bucket)
+            return ;
+
+        foreach (auto bucket, selected_buckets)
+        {
+            QLabel* label = bucket->isNarrator() ? (QLabel*)bucket->narrator : (QLabel*)bucket->bubble;
+            label->setText(said_edit->toPlainText());
+            label->adjustSize();
+            emit bucket->signalBubbleChanged();
+        }
     });
     connect(style_edit, &QPlainTextEdit::textChanged, this, [=]{
-       if (!current_bucket)
-           return ;
-       current_bucket->setStyleSheet(style_edit->toPlainText());
+        if (!current_bucket)
+            return ;
+        foreach (auto bucket, selected_buckets)
+            bucket->setStyleSheet(style_edit->toPlainText());
     });
     connect(name_check, &QCheckBox::stateChanged, this, [=](int){
         if (!current_bucket)
             return ;
-        current_bucket->setNameVisible(name_check->isChecked());
+        foreach (auto bucket, selected_buckets)
+            bucket->setNameVisible(name_check->isChecked());
     });
 
     connect(delete_bucket_button, &QPushButton::clicked, this, [=]{
         emit signalDelete();
     });
     connect(save_figure_button, &QPushButton::clicked, this, [=]{
-        emit signalSaveFigure(current_bucket);
+        foreach (auto bucket, selected_buckets)
+            emit signalSaveFigure(bucket);
     });
     connect(export_picture_button, &QPushButton::clicked, this, [=]{
         emit signalSaveToFile();
@@ -93,8 +100,9 @@ void DialogueEditor::initStyle()
 {
 }
 
-void DialogueEditor::setBucket(DialogueBucket *bucket)
+void DialogueEditor::setBucket(QList<DialogueBucket *> buckets, DialogueBucket *bucket)
 {
+    selected_buckets = buckets;
     current_bucket = bucket;
     if (bucket == nullptr)
     {

@@ -26,7 +26,7 @@ public:
 
     void initView();
     void initStyle();
-    void setBucket(DialogueBucket* bucket);
+    void setBucket(QList<DialogueBucket*>buckets, DialogueBucket* bucket);
 
     void setDataDir(QString dir);
 
@@ -44,6 +44,7 @@ public slots:
 private:
     QString data_dir;
     DialogueBucket* current_bucket = nullptr; // 正在编辑的 bucket
+    QList<DialogueBucket*> selected_buckets; // 选中（包括正在编辑）的bucket
 
     QPushButton *avatar_btn;
     QLabel *name_label, *said_label, *style_label;

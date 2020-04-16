@@ -58,6 +58,9 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
     void keyPressEvent(QKeyEvent *event) override;
 
+    void beginMultiAdd();
+    void endMultiAdd();
+
 signals:
 
 public slots:
@@ -103,6 +106,8 @@ private:
 
     DialogueManager* manager;
     QList<DialogueBucket*> buckets;
+
+    bool _multi_adding = false;
 };
 
 #endif // DIALOGUEGROUP_H

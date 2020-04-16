@@ -51,16 +51,22 @@ void DialogueGroup::initView()
     connect(right_button, SIGNAL(clicked()), this, SLOT(slotAddRightChat()));
 
     connect(dialogues_list_widget, &QListWidget::currentRowChanged, this, [=](int row){
-        if (row == -1 || row > dialogues_list_widget->count())
+        if (_multi_adding) // 正在批量编辑，暂不进行操作
+            return ;
+        if (row == -1 || row >= dialogues_list_widget->count())
         {
-            editor->setBucket(nullptr);
+            editor->setBucket(QList<DialogueBucket*>{}, nullptr);
             return ;
         }
         auto bucket = buckets[row];
-        editor->setBucket(bucket);
+        QList<DialogueBucket*> selecteds;
+        for (int i = 0; i < dialogues_list_widget->count(); i++)
+            if (dialogues_list_widget->item(i)->isSelected())
+                selecteds.append(buckets[i]);
+        editor->setBucket(selecteds, bucket);
     });
     connect(dialogues_list_widget, &QListWidget::doubleClicked, this, [=](const QModelIndex& index) {
-        int row = index.row();
+        // int row = index.row(); // 不用确定行数，肯定已经是当前行了
         editor->focusSaid();
     });
     connect(dialogues_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotDialogueMenuShowed(QPoint)));
@@ -330,6 +336,32 @@ qDebug() << inDlg << inFgr << (inDlg && sc(ctrl, Qt::Key_Up));
     QWidget::keyPressEvent(event);
 }
 
+void DialogueGroup::beginMultiAdd()
+{
+    _multi_adding = true;
+
+    editor->setBucket(QList<DialogueBucket*>{}, nullptr);
+}
+
+void DialogueGroup::endMultiAdd()
+{
+    _multi_adding = false;
+
+    // 传递信号给editor
+    int row = dialogues_list_widget->currentRow();
+    if (row == -1 || row >= dialogues_list_widget->count())
+    {
+        editor->setBucket(QList<DialogueBucket*>{}, nullptr);
+        return ;
+    }
+    auto bucket = buckets[row];
+    QList<DialogueBucket*> selecteds;
+    for (int i = 0; i < dialogues_list_widget->count(); i++)
+        if (dialogues_list_widget->item(i)->isSelected())
+            selecteds.append(buckets[i]);
+    editor->setBucket(selecteds, bucket);
+}
+
 void DialogueGroup::slotAddLeftChat()
 {
     auto bucket = new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this);
@@ -585,6 +617,7 @@ void DialogueGroup::refreshFigures()
 
 void DialogueGroup::actionInsertLeftChat(bool next)
 {
+    beginMultiAdd();
     auto items = dialogues_list_widget->selectedItems();
     if (items.size() == 0)
         items = QList<QListWidgetItem*>{nullptr};
@@ -597,10 +630,12 @@ void DialogueGroup::actionInsertLeftChat(bool next)
     }
     if (items.size() == 1)
         editor->focusSaid();
+    endMultiAdd();
 }
 
 void DialogueGroup::actionInsertNarrator(bool next)
 {
+    beginMultiAdd();
     auto items = dialogues_list_widget->selectedItems();
     if (items.size() == 0)
         items = QList<QListWidgetItem*>{nullptr};
@@ -612,10 +647,12 @@ void DialogueGroup::actionInsertNarrator(bool next)
     }
     if (items.size() == 1)
         editor->focusSaid();
+    endMultiAdd();
 }
 
 void DialogueGroup::actionInsertRightChat(bool next)
 {
+    beginMultiAdd();
     auto items = dialogues_list_widget->selectedItems();
     if (items.size() == 0)
         items = QList<QListWidgetItem*>{nullptr};
@@ -629,6 +666,7 @@ void DialogueGroup::actionInsertRightChat(bool next)
     }
     if (items.size() == 1)
         editor->focusSaid();
+    endMultiAdd();
 }
 
 /**
@@ -647,6 +685,7 @@ void DialogueGroup::actionRenameChatNickname()
     if (new_name.isEmpty())
         return ;
 
+    beginMultiAdd();
     // 开始重命名对话框同名
     dialogues_list_widget->clearSelection();
     for (int i = 0; i < buckets.size(); i++)
@@ -662,6 +701,7 @@ void DialogueGroup::actionRenameChatNickname()
         }
     }
     dialogues_list_widget->setFocus(); // 要 setFocus 才会 实时更新
+    endMultiAdd();
 }
 
 void DialogueGroup::actionCopyChat()
@@ -684,15 +724,18 @@ void DialogueGroup::actionPasteChat()
     QString s = QApplication::clipboard()->text();
     if (s.isEmpty())
         return ;
+    beginMultiAdd();
     int old_count = dialogues_list_widget->count();
     fromText(s);
     dialogues_list_widget->clearSelection();
     for (int i = old_count; i < dialogues_list_widget->count(); i++)
         dialogues_list_widget->setCurrentRow(i, QItemSelectionModel::Select);
+    endMultiAdd();
 }
 
 void DialogueGroup::actionChatMoveUp()
 {
+    beginMultiAdd();
     bool above_moved = false; // 上面选中的是否上移了（排除第一行开始就一直选中的情况）
     for (int row = 0; row < dialogues_list_widget->count(); row++)
     {
@@ -714,10 +757,12 @@ void DialogueGroup::actionChatMoveUp()
             above_moved = true;
         }
     }
+    endMultiAdd();
 }
 
 void DialogueGroup::actionChatMoveDown()
 {
+    beginMultiAdd();
     bool follow_moved = false; // 下面选中的是否下移了（排除最后一行开始就一直选中的情况）
     for (int row = dialogues_list_widget->count()-1; row >= 0; row--)
     {
@@ -739,6 +784,7 @@ void DialogueGroup::actionChatMoveDown()
             follow_moved = true;
         }
     }
+    endMultiAdd();
 }
 
 void DialogueGroup::actionChatDelete()
@@ -1036,6 +1082,7 @@ void DialogueGroup::slotLoadFromFile()
     if (path.isEmpty())
         return ;
 
+    beginMultiAdd();
     // 先清理掉原来的（从头导入）
     dialogues_list_widget->clear();
     foreach (auto bucket, buckets)
@@ -1050,6 +1097,7 @@ void DialogueGroup::slotLoadFromFile()
     {
 //        fromJson();
     }
+    endMultiAdd();
 }
 
 QListWidgetItem* DialogueGroup::addChat(DialogueBucket *bucket, int row)
@@ -1071,6 +1119,7 @@ QListWidgetItem* DialogueGroup::addChat(DialogueBucket *bucket, int row)
     item->setSizeHint(bucket->size());
     connect(bucket, &DialogueBucket::signalBubbleChanged, this, [=]{
         item->setSizeHint(QSize(dialogues_list_widget->contentsRect().width() - dialogues_list_widget->verticalScrollBar()->width(), bucket->sizeHint().height()));
+        update();
     });
     return item;
 }
