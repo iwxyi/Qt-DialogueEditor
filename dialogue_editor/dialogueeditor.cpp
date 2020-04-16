@@ -54,13 +54,13 @@ void DialogueEditor::initView()
             bucket->setAvatar(pixmap);
     });
     connect(name_edit, &QLineEdit::textEdited, this, [=]{
-        if (!current_bucket)
+        if (!current_bucket || _loading_bucket)
             return ;
         foreach (auto bucket, selected_buckets)
             bucket->nickname->setText(name_edit->text());
     });
     connect(said_edit, &QPlainTextEdit::textChanged, this, [=]{
-        if (!current_bucket)
+        if (!current_bucket || _loading_bucket)
             return ;
 
         foreach (auto bucket, selected_buckets)
@@ -72,13 +72,13 @@ void DialogueEditor::initView()
         }
     });
     connect(style_edit, &QPlainTextEdit::textChanged, this, [=]{
-        if (!current_bucket)
+        if (!current_bucket || _loading_bucket)
             return ;
         foreach (auto bucket, selected_buckets)
             bucket->setStyleSheet(style_edit->toPlainText());
     });
     connect(name_check, &QCheckBox::stateChanged, this, [=](int){
-        if (!current_bucket)
+        if (!current_bucket || _loading_bucket)
             return ;
         foreach (auto bucket, selected_buckets)
             bucket->setNameVisible(name_check->isChecked());
@@ -102,6 +102,7 @@ void DialogueEditor::initStyle()
 
 void DialogueEditor::setBucket(QList<DialogueBucket *> buckets, DialogueBucket *bucket)
 {
+    _loading_bucket = true;
     selected_buckets = buckets;
     current_bucket = bucket;
     if (bucket == nullptr)
@@ -151,6 +152,7 @@ void DialogueEditor::setBucket(QList<DialogueBucket *> buckets, DialogueBucket *
         name_edit->setText(bucket->nickname->text());
         said_edit->setPlainText(bucket->bubble->text());
     }
+    _loading_bucket = false;
 }
 
 void DialogueEditor::setDataDir(QString dir)

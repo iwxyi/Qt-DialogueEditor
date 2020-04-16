@@ -56,6 +56,8 @@ private:
     QPushButton *save_figure_button;
     QPushButton *export_picture_button;
     QPushButton *delete_bucket_button;
+
+    bool _loading_bucket = false;
 };
 
 #endif // DIALOGUEEDITOR_H

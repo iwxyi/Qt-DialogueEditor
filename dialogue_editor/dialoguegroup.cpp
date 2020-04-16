@@ -277,7 +277,7 @@ void DialogueGroup::keyPressEvent(QKeyEvent *event)
     auto sc = [=](Qt::KeyboardModifiers mdf, Qt::Key k) {
         return (key == k && modifiers == mdf);
     };
-qDebug() << inDlg << inFgr << (inDlg && sc(ctrl, Qt::Key_Up));
+
     if (sc(ctrl | alt, Qt::Key_Q))
         return slotAddLeftChat();
     else if (sc(ctrl | alt, Qt::Key_W))
