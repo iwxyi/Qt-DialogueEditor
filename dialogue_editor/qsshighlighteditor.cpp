@@ -12,11 +12,9 @@ void QSSHighlightEditor::keyPressEvent(QKeyEvent *e)
     // 回车缩进
     if (e->modifiers() == Qt::NoModifier && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
     {
-        // 判断上一行的开头空白
+        // 插入上一行的开头空白
         QString left = toPlainText().left(textCursor().position()-1);
-        QString thisLine = left.right(left.length() - (left.lastIndexOf("\n")+1));
-        QString blank = QRegularExpression("\\s*").match(thisLine).captured();
-        textCursor().insertText(blank);
+        textCursor().insertText(QRegularExpression("\\s*").match(left.mid(left.lastIndexOf("\n")+1)).captured());
     }
 }
 
