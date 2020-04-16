@@ -693,34 +693,51 @@ void DialogueGroup::actionPasteChat()
 
 void DialogueGroup::actionChatMoveUp()
 {
-    auto items = dialogues_list_widget->selectedItems();
-    for (int i = 0; i < items.size(); i++)
+    bool above_moved = false; // 上面选中的是否上移了（排除第一行开始就一直选中的情况）
+    for (int row = 0; row < dialogues_list_widget->count(); row++)
     {
-        int row = dialogues_list_widget->row(items.at(i));
-        if (row <= 0)
-            continue;
-        auto item = dialogues_list_widget->takeItem(row);
-        auto widget = buckets.takeAt(row);
-        insertBucketAndSetQSS(row-1, new DialogueBucket(widget), widget->styleSheet());
-        delete item;
-        delete widget;
+        if (dialogues_list_widget->item(row)->isSelected())
+        {
+            if (!above_moved) // 此行及上面全都选中，没法上移
+                continue;
+            else
+            {
+                auto item = dialogues_list_widget->takeItem(row);
+                auto widget = buckets.takeAt(row);
+                insertBucketAndSetQSS(row-1, new DialogueBucket(widget), widget->styleSheet());
+                delete item;
+                delete widget;
+            }
+        }
+        else
+        {
+            above_moved = true;
+        }
     }
 }
 
 void DialogueGroup::actionChatMoveDown()
 {
-    auto items = dialogues_list_widget->selectedItems();
-    dialogues_list_widget->clearSelection();
-    for (int i = items.size()-1; i >= 0; i--) // 倒着来
+    bool follow_moved = false; // 下面选中的是否下移了（排除最后一行开始就一直选中的情况）
+    for (int row = dialogues_list_widget->count()-1; row >= 0; row--)
     {
-        int row = dialogues_list_widget->row(items.at(i));
-        if (row >= dialogues_list_widget->count()-1)
-            continue;
-        auto item = dialogues_list_widget->takeItem(row);
-        auto widget = buckets.takeAt(row);
-        insertBucketAndSetQSS(row+1, new DialogueBucket(widget), widget->styleSheet());
-        delete item;
-        delete widget;
+        if (dialogues_list_widget->item(row)->isSelected())
+        {
+            if (!follow_moved) // 此行及上面全都选中，没法上移
+                continue;
+            else
+            {
+                auto item = dialogues_list_widget->takeItem(row);
+                auto widget = buckets.takeAt(row);
+                insertBucketAndSetQSS(row+1, new DialogueBucket(widget), widget->styleSheet());
+                delete item;
+                delete widget;
+            }
+        }
+        else
+        {
+            follow_moved = true;
+        }
     }
 }
 
