@@ -900,41 +900,76 @@ void DialogueGroup::actionRenameFigureAndDialogues()
 
 void DialogueGroup::actionFigureMoveUp()
 {
-    auto items = figure_list_widget->selectedItems();
+    QList<int>selected_rows; // 保存之前的选中
     auto& figures = manager->getFigures();
-    for (int i = 0; i < items.size(); i++)
+    bool above_moved = false; // 上面选中的是否上移了（排除第一行开始就一直选中的情况）
+    for (int row = 0; row < figure_list_widget->count(); row++)
     {
-        int row = figure_list_widget->row(items.at(i));
-        if (row <= 0)
-            continue;
-        auto figure = figures.takeAt(row);
-        figures.insert(row-1, figure);
+        if (figure_list_widget->item(row)->isSelected())
+        {
+            if (!above_moved) // 此行及上面全都选中，没法上移
+            {
+                selected_rows.append(row);
+                continue;
+            }
+            else
+            {
+                auto figure = figures.takeAt(row);
+                figures.insert(row-1, figure);
+                selected_rows.append(row-1);
+            }
+        }
+        else
+        {
+            above_moved = true;
+        }
     }
     manager->saveOrder();
 
-    QList<int>selected_rows; // 保存移动的顺序
-    items = figure_list_widget->selectedItems();
-    foreach (auto item, items)
-    {
-
-    }
     refreshFigures();
+
+    // 恢复之前选中的
+    for (int i = 0; i < selected_rows.count(); i++)
+    {
+        figure_list_widget->setCurrentRow(selected_rows.at(i), QItemSelectionModel::Select);
+    }
 }
 
 void DialogueGroup::actionFigureMoveDown()
 {
-    auto items = figure_list_widget->selectedItems();
+    QList<int>selected_rows; // 保存之前的选中
     auto& figures = manager->getFigures();
-    for (int i = items.size()-1; i >= 0; i--) // 倒着来
+    bool follow_moved = false; // 下面选中的是否下移了（排除最后一行开始就一直选中的情况）
+    for (int row = figure_list_widget->count()-1; row >= 0 ; row--)
     {
-        int row = figure_list_widget->row(items.at(i));
-        if (row >= figures.size()-1)
-            continue;
-        auto figure = figures.takeAt(row);
-        figures.insert(row+1, figure);
+        if (figure_list_widget->item(row)->isSelected())
+        {
+            if (!follow_moved) // 此行及上面全都选中，没法上移
+            {
+                selected_rows.append(row);
+                continue;
+            }
+            else
+            {
+                auto figure = figures.takeAt(row);
+                figures.insert(row+1, figure);
+                selected_rows.append(row+1);
+            }
+        }
+        else
+        {
+            follow_moved = true;
+        }
     }
     manager->saveOrder();
+
     refreshFigures();
+
+    // 恢复之前选中的
+    for (int i = 0; i < selected_rows.count(); i++)
+    {
+        figure_list_widget->setCurrentRow(selected_rows.at(i), QItemSelectionModel::Select);
+    }
 }
 
 void DialogueGroup::actionFigureDelete()
