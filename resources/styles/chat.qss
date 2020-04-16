@@ -1,14 +1,23 @@
+/*  */
 #DialogueAvatar {
+    /*  */
     border-radius: 25px;
 }
 
+/*  */
 #DialogueBubble {
+    /*  */
     border: none;
+    /*  */
     border-radius: 5px;
+    /*  */
     background-color: #eeeeee;
+    /*  */
     padding: 10px;
 }
 
+/*  */
 #DialogueFigure {
+    /*  */
     color: gray;
 }

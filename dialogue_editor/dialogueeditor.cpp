@@ -16,7 +16,7 @@ void DialogueEditor::initView()
     said_label = new QLabel("说的话/旁白", this);
     said_edit = new QPlainTextEdit(this);
     style_label = new QLabel("样式表", this);
-    style_edit = new QPlainTextEdit(this);
+    style_edit = new QSSHighlightEditor(this);
     name_check = new QCheckBox("显示名字", this);
     delete_bucket_button = new QPushButton("删除此行", this);
     export_picture_button = new QPushButton("导出对话", this);

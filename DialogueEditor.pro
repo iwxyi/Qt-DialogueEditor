@@ -28,6 +28,7 @@ SOURCES += \
     dialogue_editor/dialoguemanager.cpp \
     dialogue_editor/dialoguenarrator.cpp \
     dialogue_editor/dialoguenickname.cpp \
+    dialogue_editor/qsshighlighteditor.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -42,6 +43,7 @@ HEADERS += \
     dialogue_editor/dialoguemanager.h \
     dialogue_editor/dialoguenarrator.h \
     dialogue_editor/dialoguenickname.h \
+    dialogue_editor/qsshighlighteditor.h \
     mainwindow.h
 
 FORMS += \

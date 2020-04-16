@@ -16,6 +16,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include "dialoguebucket.h"
+#include "qsshighlighteditor.h"
 
 class DialogueEditor : public QWidget
 {
@@ -46,7 +47,8 @@ private:
 
     QPushButton *avatar_btn;
     QLabel *name_label, *said_label, *style_label;
-    QPlainTextEdit *said_edit, *style_edit;
+    QPlainTextEdit *said_edit;
+    QSSHighlightEditor *style_edit;
     QLineEdit *name_edit;
     QCheckBox *name_check;
 
