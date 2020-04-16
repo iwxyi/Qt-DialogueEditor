@@ -6,12 +6,17 @@
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
 #include <QRegularExpression>
+#include <QDebug>
 
 class QSSHighlightEditor : public QPlainTextEdit
 {
 public:
     QSSHighlightEditor(QWidget* parent = nullptr);
+
+protected:
+    void keyPressEvent(QKeyEvent *e) override;
 };
+
 
 class QSSHighlighter : public QSyntaxHighlighter
 {
