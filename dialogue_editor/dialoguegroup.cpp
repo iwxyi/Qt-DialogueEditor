@@ -262,6 +262,66 @@ void DialogueGroup::resizeEvent(QResizeEvent *event)
     }
 }
 
+void DialogueGroup::keyPressEvent(QKeyEvent *event)
+{
+    const Qt::Key key = (Qt::Key)event->key();
+    const auto modifiers = event->modifiers();
+    const auto ctrl = Qt::ControlModifier, shift = Qt::ShiftModifier, alt = Qt::AltModifier;
+    const bool inDlg = dialogues_list_widget->hasFocus(), inFgr = figure_list_widget->hasFocus();
+    auto sc = [=](Qt::KeyboardModifiers mdf, Qt::Key k) {
+        return (key == k && modifiers == mdf);
+    };
+
+    if (sc(ctrl | alt, Qt::Key_Q))
+        return slotAddLeftChat();
+    else if (sc(ctrl | alt, Qt::Key_W))
+        return slotAddNarrator();
+    else if (sc(ctrl | alt, Qt::Key_E))
+        return slotAddRightChat();
+    else if (sc(ctrl | shift, Qt::Key_Q))
+        return actionInsertLeftChat();
+    else if (sc(ctrl | shift, Qt::Key_W))
+        return actionInsertNarrator();
+    else if (sc(ctrl | shift, Qt::Key_E))
+        return actionInsertRightChat();
+    else if (sc(ctrl, Qt::Key_Q))
+        return actionInsertLeftChat(true);
+    else if (sc(ctrl, Qt::Key_W))
+        return actionInsertNarrator(true);
+    else if (sc(ctrl, Qt::Key_E))
+        return actionInsertRightChat(true);
+    else if (inDlg && sc(ctrl, Qt::Key_R))
+        return actionRenameChatNickname();
+    else if (inDlg && sc(ctrl, Qt::Key_C))
+        return actionCopyChat();
+    else if (inDlg && sc(ctrl, Qt::Key_V))
+        return actionPasteChat();
+    else if (inDlg && sc(ctrl, Qt::Key_Up))
+        return actionChatMoveUp();
+    else if (inDlg && sc(ctrl, Qt::Key_Down))
+        return actionChatMoveDown();
+    else if (inDlg && sc(nullptr, Qt::Key_Delete))
+        return actionChatDelete();
+    else if (sc(alt, Qt::Key_Up))
+        return actionInsertFigureDialogue();
+    else if (inFgr && sc(nullptr, Qt::Key_Insert))
+        return actionInsertFigureDialogue();
+    else if (inFgr && sc(shift | alt, Qt::Key_Up))
+        return actionSelectFigureDialogue();
+    else if (inFgr && sc(ctrl, Qt::Key_U))
+        return actionUpdateSelectedDialogues();
+    else if (inFgr && sc(ctrl, Qt::Key_R))
+        return actionRenameFigureAndDialogues();
+    else if (inFgr && sc(ctrl, Qt::Key_Up))
+        return actionFigureMoveUp();
+    else if (inFgr && sc(ctrl, Qt::Key_Down))
+        return actionFigureMoveDown();
+    else if (inFgr && sc(nullptr, Qt::Key_Delete))
+        return actionFigureDelete();
+
+    QWidget::keyPressEvent(event);
+}
+
 void DialogueGroup::slotAddLeftChat()
 {
     auto bucket = new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this);
@@ -303,8 +363,8 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
     QAction* insert_narr_action = new QAction("插入中间旁白", this);
     QAction* insert_right_action = new QAction("插入右边对话", this);
     QAction* rename_nickname_action = new QAction("重命名该角色", this);
-    QAction* copy_chat_action = new QAction("复制", this);
-    QAction* paste_chat_action = new QAction("粘贴", this);
+    QAction* copy_chat_action = new QAction("复制为文本", this);
+    QAction* paste_chat_action = new QAction("粘贴文本", this);
     QAction* move_up_action = new QAction("上移", this);
     QAction* move_down_action = new QAction("下移", this);
     QAction* delete_action = new QAction("删除", this);
@@ -361,11 +421,11 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
 void DialogueGroup::slotFigureMenuShowed(QPoint pos)
 {
     QMenu* menu = new QMenu("菜单");
-    QAction* insert_dialogue_action = new QAction("添加该角色对话", this);
-    QAction* select_all_dialogue_action = new QAction("选中该角色所有对话", this);
-    QAction* figure_update_all_action = new QAction("套用样式至该角色所有对话", this);
-    QAction* figure_update_select_action = new QAction("套用样式至选中对话", this);
-    QAction* figure_rename_action = new QAction("重命名该角色及对话", this);
+    QAction* insert_dialogue_action = new QAction("添加TA的对话", this);
+    QAction* select_all_dialogue_action = new QAction("选中TA的所有对话", this);
+    QAction* figure_update_all_action = new QAction("更新TA的对话样式", this);
+    QAction* figure_update_select_action = new QAction("将选中对话设为TA", this);
+    QAction* figure_rename_action = new QAction("重命名", this);
     QAction* move_up_action = new QAction("上移", this);
     QAction* move_down_action = new QAction("下移", this);
     QAction* delete_action = new QAction("删除", this);
@@ -483,17 +543,17 @@ void DialogueGroup::slotInsertFromFigure(DialogueFigure *figure)
     }
 }
 
-void DialogueGroup::insertBucketAndSetQSS(QListWidgetItem* item, DialogueBucket *bucket, QString qss, bool above)
+void DialogueGroup::insertBucketAndSetQSS(QListWidgetItem* item, DialogueBucket *bucket, QString qss, bool next)
 {
     int row = (item == nullptr ? -1 : dialogues_list_widget->row(item));
-    insertBucketAndSetQSS(row, bucket, qss, above);
+    insertBucketAndSetQSS(row, bucket, qss, next);
 }
 
-void DialogueGroup::insertBucketAndSetQSS(int row, DialogueBucket *bucket, QString qss, bool above)
+void DialogueGroup::insertBucketAndSetQSS(int row, DialogueBucket *bucket, QString qss, bool next)
 {
     if (!qss.isEmpty())
         bucket->setStyleSheet(qss);
-    if (above)
+    if (next)
     {
         if (row == -1)
             row = -2; // 保持插入在最后面
@@ -515,39 +575,45 @@ void DialogueGroup::refreshFigures()
     }
 }
 
-void DialogueGroup::actionInsertLeftChat()
+void DialogueGroup::actionInsertLeftChat(bool next)
 {
     auto items = dialogues_list_widget->selectedItems();
+    if (items.size() == 0)
+        items = QList<QListWidgetItem*>{nullptr};
     dialogues_list_widget->clearSelection();
     foreach (auto item, items)
     {
         insertBucketAndSetQSS(item,
                               new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this),
-                              DialogueBucket::getDefaultChatStyleSheet());
+                              DialogueBucket::getDefaultChatStyleSheet(), next);
     }
 }
 
-void DialogueGroup::actionInsertNarrator()
+void DialogueGroup::actionInsertNarrator(bool next)
 {
     auto items = dialogues_list_widget->selectedItems();
+    if (items.size() == 0)
+        items = QList<QListWidgetItem*>{nullptr};
     dialogues_list_widget->clearSelection();
     foreach (auto item, items)
     {
         insertBucketAndSetQSS(item, new DialogueBucket("旁白", this),
-                              DialogueBucket::getDefaultNarratorStyleSheet());
+                              DialogueBucket::getDefaultNarratorStyleSheet(), next);
     }
 }
 
-void DialogueGroup::actionInsertRightChat()
+void DialogueGroup::actionInsertRightChat(bool next)
 {
     auto items = dialogues_list_widget->selectedItems();
+    if (items.size() == 0)
+        items = QList<QListWidgetItem*>{nullptr};
     dialogues_list_widget->clearSelection();
     foreach (auto item, items)
     {
         auto bucket = new DialogueBucket(SelfChat, "我", QPixmap(":/avatars/boy_1"), "说的话", this);
         bucket->setNameVisible(false);
         insertBucketAndSetQSS(item, bucket,
-                              DialogueBucket::getDefaultChatStyleSheet());
+                              DialogueBucket::getDefaultChatStyleSheet(), next);
     }
 }
 
@@ -785,7 +851,7 @@ void DialogueGroup::actionRenameFigureAndDialogues()
         return ;
 
     // 输入姓名
-    QString new_name = QInputDialog::getText(this, "重命名角色模板及对话", "请输入新名字", QLineEdit::Normal, figure->nickname);
+    QString new_name = QInputDialog::getText(this, "重命名角色", "请输入新名字\n将更新至该角色模板，及其所有对话", QLineEdit::Normal, figure->nickname);
     if (new_name.isEmpty() || new_name == figure->nickname)
         return ;
     if (manager->getFigureByName(new_name) != nullptr)

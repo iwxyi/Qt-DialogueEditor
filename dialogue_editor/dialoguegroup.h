@@ -50,46 +50,49 @@ public:
     void setAvatarSize(int x);
 
 private:
-    void insertBucketAndSetQSS(QListWidgetItem *item, DialogueBucket* bucket, QString qss = "", bool above = false);
-    void insertBucketAndSetQSS(int row, DialogueBucket* bucket, QString qss = "", bool above = false);
+    void insertBucketAndSetQSS(QListWidgetItem *item, DialogueBucket* bucket, QString qss = "", bool next = false);
+    void insertBucketAndSetQSS(int row, DialogueBucket* bucket, QString qss = "", bool next = false);
     QListWidgetItem *addChat(DialogueBucket* bucket, int row = -1);
 
 protected:
-    void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent* event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 signals:
 
 public slots:
-    void slotAddLeftChat();
-    void slotAddNarrator();
-    void slotAddRightChat();
+    void slotAddLeftChat();  // 最下面添加左边对话 ctrl+alt+q
+    void slotAddNarrator();  // 最下面添加中间对话 ctrl+alt+w
+    void slotAddRightChat(); // 最下面添加右边对话 ctrl+alt+e
     void slotDialogueMenuShowed(QPoint pos);
     void slotFigureMenuShowed(QPoint pos);
     void slotSaveFigure(DialogueBucket* bucket);
     void slotInsertFromFigure(DialogueFigure* figure);
     void refreshFigures();
 
-    void actionInsertLeftChat();
-    void actionInsertNarrator();
-    void actionInsertRightChat();
-    void actionRenameChatNickname();
-    void actionCopyChat();
-    void actionPasteChat();
-    void actionChatMoveUp();
-    void actionChatMoveDown();
-    void actionChatDelete();
+    // ==== 对话菜单 ====
+    void actionInsertLeftChat(bool next = false);  // 插入左边对话 ctrl[+shift]+q
+    void actionInsertNarrator(bool next = false);  // 插入中间对话 ctrl[+shift]+w
+    void actionInsertRightChat(bool next = false); // 插入右边对话 ctrl[+shift]+e
+    void actionRenameChatNickname(); // 重命名对话 ctrl+r
+    void actionCopyChat();  // 复制 ctrl+c
+    void actionPasteChat(); // 粘贴 ctrl+v
+    void actionChatMoveUp();  // 上移 ctrl+↑
+    void actionChatMoveDown(); // 下移 ctrl+↓
+    void actionChatDelete(); // 删除 delete
 
-    void actionInsertFigureDialogue();
-    void actionSelectFigureDialogue();
-    void actionUpdateFigureDialogues();
-    void actionUpdateSelectedDialogues();
-    void actionRenameFigureAndDialogues();
-    void actionFigureMoveUp();
-    void actionFigureMoveDown();
-    void actionFigureDelete();
+    // ==== 角色模板菜单 ====
+    void actionInsertFigureDialogue(); // 插入到对话 alt+↑ / ins
+    void actionSelectFigureDialogue(); // 选中 alt+shift+↑
+    void actionUpdateFigureDialogues(); // 更新样式 ctrl+u
+    void actionUpdateSelectedDialogues(); // 设为模板 ctrl+t
+    void actionRenameFigureAndDialogues(); // 重命名 ctrl+r
+    void actionFigureMoveUp(); // 上移 ctrl+↑
+    void actionFigureMoveDown(); // 下移 ctrl+↓
+    void actionFigureDelete(); // 删除 delete
 
-    void slotSaveToFile();
-    void slotLoadFromFile();
+    void slotSaveToFile(); // 导出 ctrl+o
+    void slotLoadFromFile(); // 导入 ctrl+i
 
 private:
     QString data_dir;
