@@ -299,9 +299,10 @@ void DialogueGroup::slotAddRightChat()
 void DialogueGroup::slotDialogueMenuShowed(QPoint)
 {
     QMenu* menu = new QMenu("菜单");
-    QAction* insert_left_action = new QAction("插入左边", this);
-    QAction* insert_narr_action = new QAction("插入旁白", this);
-    QAction* insert_right_action = new QAction("插入右边", this);
+    QAction* insert_left_action = new QAction("插入左边对话", this);
+    QAction* insert_narr_action = new QAction("插入中间旁白", this);
+    QAction* insert_right_action = new QAction("插入右边对话", this);
+    QAction* rename_nickname_action = new QAction("重命名该角色", this);
     QAction* copy_chat_action = new QAction("复制", this);
     QAction* paste_chat_action = new QAction("粘贴", this);
     QAction* move_up_action = new QAction("上移", this);
@@ -311,6 +312,8 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
     menu->addAction(insert_left_action);
     menu->addAction(insert_narr_action);
     menu->addAction(insert_right_action);
+    menu->addSeparator();
+    menu->addAction(rename_nickname_action);
     menu->addSeparator();
     menu->addAction(copy_chat_action);
     menu->addAction(paste_chat_action);
@@ -323,21 +326,27 @@ void DialogueGroup::slotDialogueMenuShowed(QPoint)
     connect(insert_left_action, SIGNAL(triggered()), this, SLOT(actionInsertLeftChat()));
     connect(insert_narr_action, SIGNAL(triggered()), this, SLOT(actionInsertNarrator()));
     connect(insert_right_action, SIGNAL(triggered()), this, SLOT(actionInsertRightChat()));
+    connect(rename_nickname_action, SIGNAL(triggered()), this, SLOT(actionRenameChatNickname()));
     connect(copy_chat_action, SIGNAL(triggered()), this, SLOT(actionCopyChat()));
     connect(paste_chat_action, SIGNAL(triggered()), this, SLOT(actionPasteChat()));
     connect(move_up_action, SIGNAL(triggered()), this, SLOT(actionChatMoveUp()));
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionChatMoveDown()));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(actionChatDelete()));
 
-    if (dialogues_list_widget->selectedItems().size() == 0)
+    if (dialogues_list_widget->selectedItems().size() == 0) // 没选
     {
         insert_left_action->setEnabled(false);
         insert_narr_action->setEnabled(false);
         insert_right_action->setEnabled(false);
+        rename_nickname_action->setEnabled(false);
         copy_chat_action->setEnabled(false);
         move_up_action->setEnabled(false);
         move_down_action->setEnabled(false);
         delete_action->setEnabled(false);
+    }
+    else if (dialogues_list_widget->selectedItems().size() > 1) // 多选
+    {
+        rename_nickname_action->setEnabled(false);
     }
     if (QApplication::clipboard()->text().isEmpty())
     {
@@ -540,6 +549,39 @@ void DialogueGroup::actionInsertRightChat()
         insertBucketAndSetQSS(item, bucket,
                               DialogueBucket::getDefaultChatStyleSheet());
     }
+}
+
+/**
+ * 重命名对话的人名
+ * 暂时不包括角色模板名字？（不知道要不要加入这个效果）
+ */
+void DialogueGroup::actionRenameChatNickname()
+{
+    auto bucket = buckets.at(dialogues_list_widget->currentRow());
+    if (bucket->isNarrator())
+        return ;
+    QString old_name = bucket->getName();
+
+    // 输入姓名
+    QString new_name = QInputDialog::getText(this, "重命名对话人名", "请输入新名字\n如果要同步修改角色名，请改用左边角色模板的重命名", QLineEdit::Normal, old_name);
+    if (new_name.isEmpty())
+        return ;
+
+    // 开始重命名对话框同名
+    dialogues_list_widget->clearSelection();
+    for (int i = 0; i < buckets.size(); i++)
+    {
+        auto bucket = buckets.at(i);
+        if (bucket->isNarrator())
+            continue;
+        if (bucket->getName() == old_name)
+        {
+            bucket->setName(new_name);
+            bucket->update();
+            dialogues_list_widget->setCurrentRow(i, QItemSelectionModel::Select);
+        }
+    }
+    dialogues_list_widget->setFocus(); // 要 setFocus 才会 实时更新
 }
 
 void DialogueGroup::actionCopyChat()

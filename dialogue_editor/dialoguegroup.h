@@ -72,6 +72,7 @@ public slots:
     void actionInsertLeftChat();
     void actionInsertNarrator();
     void actionInsertRightChat();
+    void actionRenameChatNickname();
     void actionCopyChat();
     void actionPasteChat();
     void actionChatMoveUp();
