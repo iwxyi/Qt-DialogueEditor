@@ -1,0 +1,23 @@
+/* 头像 */
+#DialogueAvatar {
+    /* 头像圆角 */
+    border-radius: 25px;
+}
+
+/* 气泡 */
+#DialogueBubble {
+    /* 边框 */
+    border: none;
+    /* 圆角 */
+    border-radius: 5px;
+    /* 背景颜色 */
+    background-color: #eeeeee;
+    /* 内边距 */
+    padding: 10px;
+}
+
+/* 名字 */
+#DialogueNickname {
+    /* 名字颜色 */
+    color: gray;
+}

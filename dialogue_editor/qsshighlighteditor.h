@@ -2,11 +2,9 @@
 #define QSSHIGHLIGHTEDITOR_H
 
 #include <QObject>
-#include <QWidget>
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
 #include <QRegularExpression>
-#include <QDebug>
 
 class QSSHighlightEditor : public QPlainTextEdit
 {

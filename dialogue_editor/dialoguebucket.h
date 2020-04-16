@@ -11,6 +11,7 @@
 #include <QHBoxLayout>
 #include <QFile>
 #include <QTextStream>
+#include <QTextCodec>
 #include "dialoguechattype.h"
 #include "dialogueavatar.h"
 #include "dialoguenickname.h"
@@ -35,6 +36,7 @@ public:
 
     void setNameVisible(bool visible);
 
+    static QString readTextFile(QString path);
     static QString getDefaultChatStyleSheet();
     static QString getDefaultNarratorStyleSheet();
 

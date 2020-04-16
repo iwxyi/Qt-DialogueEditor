@@ -2,7 +2,7 @@
 
 DialogueNickname::DialogueNickname(QWidget *parent) : QLabel(parent)
 {
-    setObjectName("DialogueFigure");
+    setObjectName("DialogueNickname");
 }
 
 DialogueNickname::DialogueNickname(QString name, QWidget *parent) : DialogueNickname(parent)

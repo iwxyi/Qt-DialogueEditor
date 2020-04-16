@@ -1,11 +1,11 @@
-/*  */
+/* 旁白 */
 #DialogueNarrator {
-    /*  */
+    /* 边框 */
     border: none;
-    /*  */
+    /* 圆角 */
     border-radius: 5px;
-    /*  */
+    /* 背景颜色 */
     background: #eeeeee;
-    /*  */
+    /* 内边距 */
     padding: 10px;
 }

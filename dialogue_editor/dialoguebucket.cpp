@@ -110,20 +110,36 @@ void DialogueBucket::setNameVisible(bool visible)
     nickname->setVisible(visible);
 }
 
+QString DialogueBucket::readTextFile(QString path)
+{
+    QString text;
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return "";
+    }
+    if (!file.isReadable())
+    {
+        return "";
+    }
+    QTextStream text_stream(&file);
+    text_stream.setCodec(QTextCodec::codecForName(QByteArray("utf-8")));
+    while(!text_stream.atEnd())
+    {
+        text = text_stream.readAll();
+    }
+    file.close();
+    return text;
+}
+
 QString DialogueBucket::getDefaultChatStyleSheet()
 {
-    QFile file(":/styles/chat");
-    file.open(QFile::ReadOnly);
-    QTextStream in(&file);
-    return in.readAll();
+    return readTextFile(":/styles/chat");
 }
 
 QString DialogueBucket::getDefaultNarratorStyleSheet()
 {
-    QFile file(":/styles/narrator");
-    file.open(QFile::ReadOnly);
-    QTextStream in(&file);
-    return in.readAll();
+    return readTextFile(":/styles/narrator");
 }
 
 QString DialogueBucket::getName()

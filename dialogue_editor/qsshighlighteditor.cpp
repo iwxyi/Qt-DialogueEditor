@@ -2,21 +2,21 @@
 
 QSSHighlightEditor::QSSHighlightEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
-    new QSSHighlighter(this->document());
+    new QSSHighlighter(document());
 }
 
 void QSSHighlightEditor::keyPressEvent(QKeyEvent *e)
 {
     QPlainTextEdit::keyPressEvent(e);
 
-    // 回车缩进
     if (e->modifiers() == Qt::NoModifier && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
     {
-        // 插入上一行的开头空白
+        // 回车跟随上一行的缩进
         QString left = toPlainText().left(textCursor().position()-1);
         textCursor().insertText(QRegularExpression("\\s*").match(left.mid(left.lastIndexOf("\n")+1)).captured());
     }
 }
+
 
 QSSHighlighter::QSSHighlighter(QTextDocument *parent) : QSyntaxHighlighter(parent)
 {
