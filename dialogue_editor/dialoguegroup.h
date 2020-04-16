@@ -77,18 +77,18 @@ public slots:
     void actionRenameChatNickname(); // 重命名对话 ctrl+r
     void actionCopyChat();  // 复制 ctrl+c
     void actionPasteChat(); // 粘贴 ctrl+v
-    void actionChatMoveUp();  // 上移 ctrl+↑
-    void actionChatMoveDown(); // 下移 ctrl+↓
+    void actionChatMoveUp();  // 上移 ctrl+←
+    void actionChatMoveDown(); // 下移 ctrl+→
     void actionChatDelete(); // 删除 delete
 
     // ==== 角色模板菜单 ====
-    void actionInsertFigureDialogue(); // 插入到对话 alt+↑ / ins
-    void actionSelectFigureDialogue(); // 选中 alt+shift+↑
+    void actionInsertFigureDialogue(); // 插入到对话 空格 / ins
+    void actionSelectFigureDialogue(); // 选中 shift+空格
     void actionUpdateFigureDialogues(); // 更新样式 ctrl+u
     void actionUpdateSelectedDialogues(); // 设为模板 ctrl+t
     void actionRenameFigureAndDialogues(); // 重命名 ctrl+r
-    void actionFigureMoveUp(); // 上移 ctrl+↑
-    void actionFigureMoveDown(); // 下移 ctrl+↓
+    void actionFigureMoveUp(); // 上移 ctrl+←
+    void actionFigureMoveDown(); // 下移 ctrl+→
     void actionFigureDelete(); // 删除 delete
 
     void slotSaveToFile(); // 导出 ctrl+o

@@ -271,7 +271,7 @@ void DialogueGroup::keyPressEvent(QKeyEvent *event)
     auto sc = [=](Qt::KeyboardModifiers mdf, Qt::Key k) {
         return (key == k && modifiers == mdf);
     };
-
+qDebug() << inDlg << inFgr << (inDlg && sc(ctrl, Qt::Key_Up));
     if (sc(ctrl | alt, Qt::Key_Q))
         return slotAddLeftChat();
     else if (sc(ctrl | alt, Qt::Key_W))
@@ -296,28 +296,36 @@ void DialogueGroup::keyPressEvent(QKeyEvent *event)
         return actionCopyChat();
     else if (inDlg && sc(ctrl, Qt::Key_V))
         return actionPasteChat();
-    else if (inDlg && sc(ctrl, Qt::Key_Up))
+    else if (inDlg && sc(ctrl, Qt::Key_Left))
         return actionChatMoveUp();
-    else if (inDlg && sc(ctrl, Qt::Key_Down))
+    else if (inDlg && sc(ctrl, Qt::Key_Right))
         return actionChatMoveDown();
     else if (inDlg && sc(nullptr, Qt::Key_Delete))
         return actionChatDelete();
-    else if (sc(alt, Qt::Key_Up))
+    else if (inFgr && sc(nullptr, Qt::Key_Enter))
+        return actionInsertFigureDialogue();
+    else if (inFgr && sc(nullptr, Qt::Key_Return))
         return actionInsertFigureDialogue();
     else if (inFgr && sc(nullptr, Qt::Key_Insert))
         return actionInsertFigureDialogue();
-    else if (inFgr && sc(shift | alt, Qt::Key_Up))
+    else if (inFgr && sc(shift, Qt::Key_Enter))
+        return actionSelectFigureDialogue();
+    else if (inFgr && sc(shift, Qt::Key_Return))
         return actionSelectFigureDialogue();
     else if (inFgr && sc(ctrl, Qt::Key_U))
         return actionUpdateSelectedDialogues();
     else if (inFgr && sc(ctrl, Qt::Key_R))
         return actionRenameFigureAndDialogues();
-    else if (inFgr && sc(ctrl, Qt::Key_Up))
+    else if (inFgr && sc(ctrl, Qt::Key_Left))
         return actionFigureMoveUp();
-    else if (inFgr && sc(ctrl, Qt::Key_Down))
+    else if (inFgr && sc(ctrl, Qt::Key_Right))
         return actionFigureMoveDown();
     else if (inFgr && sc(nullptr, Qt::Key_Delete))
         return actionFigureDelete();
+    else if (sc(ctrl, Qt::Key_O))
+        return slotSaveToFile();
+    else if (sc(ctrl, Qt::Key_I))
+        return slotLoadFromFile();
 
     QWidget::keyPressEvent(event);
 }
@@ -587,6 +595,8 @@ void DialogueGroup::actionInsertLeftChat(bool next)
                               new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this),
                               DialogueBucket::getDefaultChatStyleSheet(), next);
     }
+    if (items.size() == 1)
+        editor->focusSaid();
 }
 
 void DialogueGroup::actionInsertNarrator(bool next)
@@ -600,6 +610,8 @@ void DialogueGroup::actionInsertNarrator(bool next)
         insertBucketAndSetQSS(item, new DialogueBucket("旁白", this),
                               DialogueBucket::getDefaultNarratorStyleSheet(), next);
     }
+    if (items.size() == 1)
+        editor->focusSaid();
 }
 
 void DialogueGroup::actionInsertRightChat(bool next)
@@ -615,6 +627,8 @@ void DialogueGroup::actionInsertRightChat(bool next)
         insertBucketAndSetQSS(item, bucket,
                               DialogueBucket::getDefaultChatStyleSheet(), next);
     }
+    if (items.size() == 1)
+        editor->focusSaid();
 }
 
 /**
@@ -670,7 +684,11 @@ void DialogueGroup::actionPasteChat()
     QString s = QApplication::clipboard()->text();
     if (s.isEmpty())
         return ;
+    int old_count = dialogues_list_widget->count();
     fromText(s);
+    dialogues_list_widget->clearSelection();
+    for (int i = old_count; i < dialogues_list_widget->count(); i++)
+        dialogues_list_widget->setCurrentRow(i, QItemSelectionModel::Select);
 }
 
 void DialogueGroup::actionChatMoveUp()
@@ -893,6 +911,13 @@ void DialogueGroup::actionFigureMoveUp()
         figures.insert(row-1, figure);
     }
     manager->saveOrder();
+
+    QList<int>selected_rows; // 保存移动的顺序
+    items = figure_list_widget->selectedItems();
+    foreach (auto item, items)
+    {
+
+    }
     refreshFigures();
 }
 
