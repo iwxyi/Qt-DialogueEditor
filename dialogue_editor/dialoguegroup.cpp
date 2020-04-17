@@ -14,6 +14,8 @@ DialogueGroup::DialogueGroup(QString dir, QWidget *parent) : DialogueGroup(paren
 
 void DialogueGroup::initView()
 {
+    setAcceptDrops(true);
+
     dialogues_list_widget = new QListWidget(this);
     figure_list_widget = new QListWidget(this);
     left_button = new QPushButton("+左边", this);
@@ -38,6 +40,8 @@ void DialogueGroup::initView()
     main_hlayout->setStretch(1, 3);
     main_hlayout->setStretch(2, 2);
 
+    dialogues_list_widget->setDragEnabled(true);
+    dialogues_list_widget->setDropIndicatorShown(true);
     dialogues_list_widget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     dialogues_list_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     dialogues_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -338,12 +342,12 @@ QString DialogueGroup::toText(QString indent_blank, QString indent_line)
     return toText(buckets, indent_blank, indent_line);
 }
 
-void DialogueGroup::fromJson(QJsonObject)
+void DialogueGroup::fromJson(QString text)
 {
 
 }
 
-QJsonObject DialogueGroup::toJson()
+QString DialogueGroup::toJson()
 {
 
 }
@@ -472,6 +476,72 @@ void DialogueGroup::keyPressEvent(QKeyEvent *event)
         return slotLoadFromFile();
 
     QWidget::keyPressEvent(event);
+}
+
+void DialogueGroup::dragEnterEvent(QDragEnterEvent *event)
+{
+    const QMimeData* mime = event->mimeData();
+    if (mime->hasText() || mime->hasUrls())
+    {
+        return event->accept();
+    }
+
+    QWidget::dragMoveEvent(event);
+}
+
+void DialogueGroup::dragMoveEvent(QDragMoveEvent *event)
+{
+    const QMimeData* mime = event->mimeData();
+    if (mime->hasText() || mime->hasUrls())
+    {
+        if (dialogues_list_widget->geometry().contains(event->pos()))
+        {
+            return event->accept();
+        }
+    }
+
+    QWidget::dragMoveEvent(event);
+}
+
+void DialogueGroup::dropEvent(QDropEvent *event)
+{
+    const QMimeData* mime = event->mimeData();
+    if (mime->hasText() || mime->hasUrls())
+    {
+        if (dialogues_list_widget->geometry().contains(event->pos()))
+        {
+            QString text;
+            if (mime->hasText())
+                text = mime->text();
+            else if (mime->hasUrls())
+            {
+                QString url = mime->urls().first().toLocalFile();
+                QFileInfo file(url);
+                if (!file.exists() || file.isDir())
+                    return QWidget::dropEvent(event);
+                if (file.suffix() == "txt")
+                    text = DialogueManager::readTextFile(url);
+                else if (file.suffix() == "json")
+                {
+                    beginMultiAdd();
+                    text = DialogueManager::readTextFile(url);
+                    fromJson(text);
+                    endMultiAdd();
+                    return event->accept();
+                }
+                else
+                    return QWidget::dropEvent(event);
+            }
+            beginMultiAdd();
+            fromText(text);
+            endMultiAdd();
+
+            return event->accept();
+        }
+    }
+
+
+    QWidget::dropEvent(event);
 }
 
 void DialogueGroup::slotAddLeftChat()
@@ -1222,9 +1292,9 @@ void DialogueGroup::slotLoadFromFile()
     {
         fromText(DialogueManager::readTextFile(path));
     }
-    else
+    else if (path.endsWith(".json")) // json 文件
     {
-//        fromJson();
+        fromJson(DialogueManager::readTextFile(path));
     }
     endMultiAdd();
 }

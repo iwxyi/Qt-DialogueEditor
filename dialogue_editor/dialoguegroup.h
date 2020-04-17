@@ -24,6 +24,7 @@
 #include <QFileDialog>
 #include <QClipboard>
 #include <QInputDialog>
+#include <QMimeData>
 #include "dialoguebucket.h"
 #include "dialogueeditor.h"
 #include "dialoguemanager.h"
@@ -45,8 +46,8 @@ public:
     void fromText(QString full);
     QString toText(QList<DialogueBucket *> buckets, QString indent_blank = "　　", QString indent_line = "\n\n");
     QString toText(QString indent_blank = "　　", QString indent_line = "\n\n");
-    void fromJson(QJsonObject);
-    QJsonObject toJson();
+    void fromJson(QString text);
+    QString toJson();
     QPixmap toPixmap();
 
     void setAvatarSize(int x);
@@ -59,6 +60,9 @@ private:
 protected:
     void resizeEvent(QResizeEvent* event) override;
     void keyPressEvent(QKeyEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 signals:
 
