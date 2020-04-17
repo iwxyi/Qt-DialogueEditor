@@ -150,9 +150,13 @@ void DialogueGroup::fromText(QString full)
     foreach (auto para, paras)
     {
         para = para.trimmed();
+        QString judgeable_para = para; // 去掉可能误解的用来判断的para
+        // 因为已经匹配的不会连续替换，就直接替换两次了
+        judgeable_para.replace(QRegExp("(\\d+\\s?):(\\s?\\d+)"), "\\1\\2").replace(QRegExp("(\\d+\\s?):(\\s?\\d+)"), "\\1\\2");
         if (para.isEmpty())
             continue;
-        if (para.indexOf("“") == -1 /*&& para.indexOf(":") == -1*/ && para.indexOf("：") == -1) // 是旁白
+
+        if (para.indexOf("“") == -1 && judgeable_para.indexOf(":") == -1 && para.indexOf("：") == -1) // 是旁白
         {
             // 判断是不是上一段的人说的话
             if (prev_figure)
@@ -1014,7 +1018,7 @@ void DialogueGroup::actionEditFigureLineReg()
     QString new_reg = QInputDialog::getText(this, "角色行匹配表达式", "匹配该角色的正则表达式，\n若匹配一部分，则\n若匹配整行（例如：^.*名字.*$），则下一行作为TA说的话", QLineEdit::Normal, old_reg, &ok);
     if (!ok)
         return ;
-    figure->line_pattern = new_reg;
+    figure->setLineReg(new_reg);
 
     manager->saveData(figure);
 }
