@@ -192,29 +192,50 @@ void DialogueGroup::fromText(QString full)
         }
         else // 是说话
         {
-            QString name, said;
-            if (para.indexOf("“") != -1)
+            QString name;
+            // 使用正则表达式提取双引号里面的
+            QRegularExpression quotes_reg("“.+?”");
+            QRegularExpressionMatchIterator iterator = quotes_reg.globalMatch(para);
+            QStringList saids;
+            if (iterator.hasNext()) // 优先正则匹配
+            {
+                do {
+                    auto match = iterator.next();
+                    auto capd = match.captured();
+                    saids.append(capd.mid(1, capd.length()-2)); // 去掉双引号
+                } while (iterator.hasNext());
+
+                // 去掉双引号及内部的内容
+                para.replace(quotes_reg, "");
+                qDebug() << "去掉双引号后的" << para;
+                name = para.replace(QRegExp("[，。！？：]+$"), "");
+            }
+            else if (para.indexOf("“") != -1) // 有前引号
             {
                 int l_pos = para.indexOf("“");
                 int r_pos = para.indexOf("”", l_pos+1);
-                if (r_pos == -1)
+                if (r_pos == -1) // 没有后引号，可能就是这种情况
                     r_pos = para.length();
+
                 name = para.mid(0, l_pos).trimmed();
-                said = para.mid(l_pos+1, r_pos-l_pos-1).trimmed();
+                QString said = para.mid(l_pos+1, r_pos-l_pos-1).trimmed();
                 if (name.endsWith("：") || name.endsWith(":"))
                     name = name.left(name.length()-1);
+                saids.append(said);
             }
-            else
+            else // 只有冒号的
             {
                 int c_pos= para.indexOf("：");
                 if (c_pos == -1)
                     c_pos = para.indexOf(":");
                 name = para.left(c_pos);
-                said = para.right(para.length() - c_pos - 1);
+                QString said = para.right(para.length() - c_pos - 1);
+                saids.append(said);
             }
 
+            // 通过 figure 获取 bucket 信息
             ChatType type = (name=="我") ? ChatType::SelfChat : ChatType::OppoChat;
-            QPixmap avatar = QPixmap(":/avatars/girl_1"); // TODO: 确保默认头像存在
+            QPixmap avatar = QPixmap(":/avatars/girl_1"); // TODO: 默认头像应该用个全局数值代替
             QString style = DialogueBucket::getDefaultChatStyleSheet();
 
             auto figure = manager->getFigureByName(name);
@@ -240,9 +261,12 @@ void DialogueGroup::fromText(QString full)
                 avatar = figure->avatar;
                 style = figure->qss;
             }
-            auto bucket = new DialogueBucket(type, name, avatar, said, this);
-            bucket->setStyleSheet(style);
-            addChat(bucket);
+            foreach (QString said, saids)
+            {
+                auto bucket = new DialogueBucket(type, name, avatar, said, this);
+                bucket->setStyleSheet(style);
+                addChat(bucket);
+            }
         }
     }
 }
