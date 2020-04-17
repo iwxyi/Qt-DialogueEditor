@@ -46,7 +46,7 @@ void DialogueGroup::initView()
     dialogues_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     figure_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
     figure_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    figure_list_widget->setToolTip("角色模板，双击插入该角色至对话框\n通过最右边“保存角色”创建");
+    figure_list_widget->setToolTip("角色模板，双击(ctrl+数字)插入该角色至对话框\n通过最右边“保存角色”创建");
 
     connect(left_button, SIGNAL(clicked()), this, SLOT(slotAddLeftChat()));
     connect(mid_button, SIGNAL(clicked()), this, SLOT(slotAddNarrator()));
@@ -472,6 +472,24 @@ void DialogueGroup::keyPressEvent(QKeyEvent *event)
         return slotSaveToFile();
     else if (sc(ctrl, Qt::Key_I))
         return slotLoadFromFile();
+    else if (sc(ctrl, Qt::Key_1))
+        return actionInsertFigureDialogueByIndex(0);
+    else if (sc(ctrl, Qt::Key_2))
+        return actionInsertFigureDialogueByIndex(1);
+    else if (sc(ctrl, Qt::Key_3))
+        return actionInsertFigureDialogueByIndex(2);
+    else if (sc(ctrl, Qt::Key_4))
+        return actionInsertFigureDialogueByIndex(3);
+    else if (sc(ctrl, Qt::Key_5))
+        return actionInsertFigureDialogueByIndex(4);
+    else if (sc(ctrl, Qt::Key_6))
+        return actionInsertFigureDialogueByIndex(5);
+    else if (sc(ctrl, Qt::Key_7))
+        return actionInsertFigureDialogueByIndex(6);
+    else if (sc(ctrl, Qt::Key_8))
+        return actionInsertFigureDialogueByIndex(7);
+    else if (sc(ctrl, Qt::Key_9))
+        return actionInsertFigureDialogueByIndex(8);
 
     QWidget::keyPressEvent(event);
 }
@@ -809,7 +827,10 @@ void DialogueGroup::refreshFigures()
     for (int i = 0; i < figures.size(); i++)
     {
         auto figure = figures.at(i);
-        QListWidgetItem* item = new QListWidgetItem(figure->avatar, figure->nickname);
+        QString name = figure->nickname;
+        if (i < 9)
+            name = "[" + QString::number(i+1) + "] " + name;
+        QListWidgetItem* item = new QListWidgetItem(figure->avatar, name);
         figure_list_widget->addItem(item);
     }
 }
@@ -1334,6 +1355,14 @@ void DialogueGroup::actionFigureDelete()
     }
     manager->saveOrder();
     refreshFigures();
+}
+
+void DialogueGroup::actionInsertFigureDialogueByIndex(int index)
+{
+    if (index < 0 || index >= manager->getFigures().size())
+        return ;
+    slotInsertFromFigure(manager->getFigures().at(index));
+    editor->focusSaid();
 }
 
 void DialogueGroup::slotSaveToFile()

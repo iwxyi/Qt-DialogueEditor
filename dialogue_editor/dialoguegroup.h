@@ -100,6 +100,7 @@ public slots:
     void actionFigureMoveUp(); // 上移 ctrl+←
     void actionFigureMoveDown(); // 下移 ctrl+→
     void actionFigureDelete(); // 删除 delete
+    void actionInsertFigureDialogueByIndex(int index);
 
     void slotSaveToFile(); // 导出 ctrl+o
     void slotLoadFromFile(); // 导入 ctrl+i
