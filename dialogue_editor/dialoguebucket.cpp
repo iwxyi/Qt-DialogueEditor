@@ -107,6 +107,8 @@ bool DialogueBucket::isNarrator() const
 
 void DialogueBucket::setNameVisible(bool visible)
 {
+    if (isNarrator())
+        return ;
     nickname->setVisible(visible);
 }
 

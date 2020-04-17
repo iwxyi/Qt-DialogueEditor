@@ -60,9 +60,17 @@ void DialogueGroup::initView()
         }
         auto bucket = buckets[row];
         QList<DialogueBucket*> selecteds;
-        for (int i = 0; i < dialogues_list_widget->count(); i++)
-            if (dialogues_list_widget->item(i)->isSelected())
-                selecteds.append(buckets[i]);
+        if (dialogues_list_widget->selectedItems().size() == 1)
+        {
+            selecteds.append(bucket);
+        }
+        else
+        {
+            // 单选判断的机制不一样，获取到的是上一次单选的
+            for (int i = 0; i < dialogues_list_widget->count(); i++)
+                if (dialogues_list_widget->item(i)->isSelected())
+                    selecteds.append(buckets[i]);
+        }
         editor->setBucket(selecteds, bucket);
     });
     connect(dialogues_list_widget, &QListWidget::doubleClicked, this, [=](const QModelIndex& index) {
