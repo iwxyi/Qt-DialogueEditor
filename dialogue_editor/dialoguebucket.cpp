@@ -47,7 +47,7 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     {
     }
 
-    hlayout->setSpacing(12);
+    hlayout->setSpacing(8);
     vlayout->setSpacing(4);
     vlayout->setMargin(8);
     vlayout->setAlignment(Qt::AlignVCenter);

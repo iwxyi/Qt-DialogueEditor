@@ -205,10 +205,45 @@ void DialogueGroup::fromText(QString full)
                     saids.append(capd.mid(1, capd.length()-2)); // 去掉双引号
                 } while (iterator.hasNext());
 
-                // 去掉双引号及内部的内容
-                para.replace(quotes_reg, "");
-                qDebug() << "去掉双引号后的" << para;
-                name = para.replace(QRegExp("[，。！？：]+$"), "");
+                // 去掉双引号及内部话语，只剩下引号外的内容
+                /*para.replace(quotes_reg, "");
+                name = para.replace(QRegExp("[，。！？：]+$"), "");*/
+                QStringList outs = para.split(quotes_reg, QString::SkipEmptyParts);
+                for (int i = 0; i < outs.size(); i++)
+                {
+                    outs[i].replace(QRegExp("[，。！？：]+$"), ""); // 去掉后面的标点
+                    if (outs[i].isEmpty())
+                        outs.removeAt(i--);
+                }
+
+                if (outs.size())
+                {
+                    // 先判断有没有角色模板
+                    foreach (auto out, outs)
+                    {
+                        foreach (auto figure, figures)
+                        {
+                            if (figure->isNarrator())
+                                continue;
+                            if (out.indexOf(figure->nickname) != -1) // 包含这个名字，就是他了
+                            {
+                                name = figure->nickname;
+                                break;
+                            }
+                            else if (!figure->name_pattern.isEmpty() && figure->name_reg.match(out).hasMatch())
+                            {
+                                name = figure->nickname;
+                                break;
+                            }
+                        }
+                        if (!name.isEmpty())
+                            break;
+                    }
+
+                    // 没有找到角色模板
+                    if (name.isEmpty())
+                        name = outs[0];
+                }
             }
             else if (para.indexOf("“") != -1) // 有前引号
             {
