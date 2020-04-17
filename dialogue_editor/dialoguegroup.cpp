@@ -830,7 +830,7 @@ void DialogueGroup::slotBucketDragOutEvent(QPoint press_pos)
     int current_height = 0;
     foreach (auto bucket, selected_buckets)
     {
-        bucket->render(&pixmap, QPoint(0, current_height));
+        bucket->render(&pixmap, QPoint(0, current_height), QRect(0,0,bucket->width(),bucket->height()), QWidget::DrawChildren);
         current_height += bucket->height()+8;
     }
 

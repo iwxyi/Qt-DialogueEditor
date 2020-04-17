@@ -84,10 +84,6 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     }
     vlayout->addLayout(flayout);
     vlayout->addLayout(blayout);
-
-    QPalette pa(this->palette());
-    pa.setColor(QPalette::Window, Qt::transparent);
-    pa.setColor(QPalette::Background, Qt::transparent);
 }
 
 void DialogueBucket::initView(QString narr)
