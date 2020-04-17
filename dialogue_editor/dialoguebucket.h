@@ -12,6 +12,9 @@
 #include <QFile>
 #include <QTextStream>
 #include <QTextCodec>
+#include <QMouseEvent>
+#include <QDebug>
+#include <QApplication>
 #include "dialoguechattype.h"
 #include "dialogueavatar.h"
 #include "dialoguenickname.h"
@@ -49,8 +52,13 @@ public:
     void setNarrator(QString narrator);
     void setAvatarSize(int x);
 
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+
 signals:
     void signalBubbleChanged();
+    void signalDragOutEvent(QPoint press_pos);
 
 public slots:
 
@@ -61,6 +69,8 @@ protected:
     DialogueAvatar *avatar = nullptr; // 头像
     DialogueBubble *bubble = nullptr; // 气泡
     DialogueNarrator *narrator = nullptr; // 旁白
+
+    QPoint press_pos;
 };
 
 #endif // DIALOGUEBUCKET_H

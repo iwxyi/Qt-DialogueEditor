@@ -25,6 +25,7 @@
 #include <QClipboard>
 #include <QInputDialog>
 #include <QMimeData>
+#include <QDrag>
 #include "dialoguebucket.h"
 #include "dialogueeditor.h"
 #include "dialoguemanager.h"
@@ -75,6 +76,7 @@ public slots:
     void slotSaveFigure(DialogueBucket* bucket);
     void slotInsertFromFigure(DialogueFigure* figure);
     void refreshFigures();
+    void slotBucketDragOutEvent(QPoint press_pos);
 
     // ==== 对话菜单 ====
     void actionInsertLeftChat(bool next = false);  // 插入左边对话 ctrl[+shift]+q

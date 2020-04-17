@@ -40,8 +40,6 @@ void DialogueGroup::initView()
     main_hlayout->setStretch(1, 3);
     main_hlayout->setStretch(2, 2);
 
-    dialogues_list_widget->setDragEnabled(true);
-    dialogues_list_widget->setDropIndicatorShown(true);
     dialogues_list_widget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     dialogues_list_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     dialogues_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -506,6 +504,8 @@ void DialogueGroup::dragMoveEvent(QDragMoveEvent *event)
 void DialogueGroup::dropEvent(QDropEvent *event)
 {
     const QMimeData* mime = event->mimeData();
+    if (mime->parent() == this)
+        return QWidget::dropEvent(event); // 自己拖出去的，不要导入
     if (mime->hasText() || mime->hasUrls())
     {
         if (dialogues_list_widget->geometry().contains(event->pos()))
@@ -533,7 +533,11 @@ void DialogueGroup::dropEvent(QDropEvent *event)
                     return QWidget::dropEvent(event);
             }
             beginMultiAdd();
+            int old_count = dialogues_list_widget->count();
             fromText(text);
+            dialogues_list_widget->clearSelection();
+            for (int i = old_count; i < dialogues_list_widget->count(); i++)
+                dialogues_list_widget->setCurrentRow(i, QItemSelectionModel::Select);
             endMultiAdd();
 
             return event->accept();
@@ -799,6 +803,65 @@ void DialogueGroup::refreshFigures()
         QListWidgetItem* item = new QListWidgetItem(figure->avatar, figure->nickname);
         figure_list_widget->addItem(item);
     }
+}
+
+/**
+ * 横向拖动对话
+ */
+void DialogueGroup::slotBucketDragOutEvent(QPoint press_pos)
+{
+    // 获取导出图片的高度
+    int total_height = 0;
+    QList<DialogueBucket*> selected_buckets;
+    for (int i = 0; i < dialogues_list_widget->count(); i++)
+    {
+        if (dialogues_list_widget->item(i)->isSelected())
+        {
+            auto bucket = buckets.at(i);
+            selected_buckets.append(bucket);
+            total_height += bucket->height();
+        }
+    }
+    QPixmap pixmap(QSize(dialogues_list_widget->contentsRect().width(), total_height));
+    QColor bg_color = dialogues_list_widget->palette().window().color();
+    pixmap.fill(bg_color);
+
+    // 绘制到图片
+    int current_height = 0;
+    foreach (auto bucket, selected_buckets)
+    {
+        bucket->render(&pixmap, QPoint(0, current_height));
+        current_height += bucket->height();
+    }
+
+    // 设置 Mime
+    QMimeData* mime = new QMimeData;
+    mime->setParent(this);
+
+    // mime文字
+    mime->setText(toText(selected_buckets));
+
+    // mime图片
+    mime->setImageData(pixmap);
+
+    // mime文件
+    QString path = data_dir + "/对话.png";
+    pixmap.save(path);
+    mime->setUrls(QList<QUrl>{QUrl::fromLocalFile(path)});
+
+    // 开始拖拽
+    QDrag* drag = new QDrag(this);
+    drag->setMimeData(mime);
+    drag->setPixmap(pixmap);
+    drag->setHotSpot(press_pos - QCursor::pos());
+    connect(drag, &QDrag::destroyed, this, [=](QObject*){
+        QTimer::singleShot(10000, [=]{
+            QFile file(path);
+            if(file.exists())
+                file.remove();
+        });
+    });
+    drag->exec();
 }
 
 void DialogueGroup::actionInsertLeftChat(bool next)
@@ -1320,5 +1383,6 @@ QListWidgetItem* DialogueGroup::addChat(DialogueBucket *bucket, int row)
         item->setSizeHint(QSize(dialogues_list_widget->contentsRect().width() - dialogues_list_widget->verticalScrollBar()->width(), bucket->sizeHint().height()));
         update();
     });
+    connect(bucket, SIGNAL(signalDragOutEvent(QPoint)), this, SLOT(slotBucketDragOutEvent(QPoint)));
     return item;
 }

@@ -184,3 +184,24 @@ void DialogueBucket::setAvatarSize(int x)
 {
     avatar->setFixedSize(x, x);
 }
+
+void DialogueBucket::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        press_pos = event->pos();
+    }
+    return QWidget::mousePressEvent(event);
+}
+
+void DialogueBucket::mouseMoveEvent(QMouseEvent *event)
+{
+    // 纵向拖拽是多选，此处不处理
+    // 横向拖拽是导出
+    if ((event->buttons() & Qt::LeftButton) && (event->pos().x() < 0-QApplication::startDragDistance() || event->pos().x() > width() + QApplication::startDragDistance()))
+    {
+        emit signalDragOutEvent(mapToGlobal(press_pos));
+    }
+
+    return QWidget::mouseMoveEvent(event);
+}
