@@ -34,30 +34,14 @@ void DialogueManager::loadData()
         if (!QFile(dir.absoluteFilePath("config.ini")).exists())
             continue;
         QSettings sts(dir.absoluteFilePath("config.ini"), QSettings::IniFormat, this);
-        createFigure((ChatType)(sts.value("type").toInt()),
+        auto figure = createFigure((ChatType)(sts.value("type").toInt()),
                      sts.value("nickname").toString(),
                      QPixmap(dir.absoluteFilePath("avatar.png")),
                      readTextFile(dir.absoluteFilePath("style_sheet.qss")),
                      sts.value("id").toString());
+        figure->line_reg = sts.value("line_reg", "").toString();
+        figure->name_reg = sts.value("name_reg", "").toString();
     }
-
-    /*// 按目录读取
-    QDir dirs(data_dir+"figures"); // data_dir/figures/aaa/config
-    auto infos = dirs.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-    foreach (auto info, infos)
-    {
-        if (!info.isDir())
-            continue;
-        QDir dir(info.absoluteFilePath());
-        if (!QFile(dir.absoluteFilePath("config.ini")).exists())
-            continue;
-        QSettings s(dir.absoluteFilePath("config.ini"), QSettings::IniFormat, this);
-        createFigure((ChatType)(s.value("type").toInt()),
-                        s.value("nickname").toString(),
-                        QPixmap(dir.absoluteFilePath("avatar.png")),
-                        readTextFile(dir.absoluteFilePath("style_sheet.qss")),
-                        s.value("id").toString());
-    }*/
 }
 
 /**
@@ -72,6 +56,10 @@ void DialogueManager::saveData(DialogueFigure *figure)
     s.setValue("id", figure->figure_id);
     s.setValue("type", (int)figure->type);
     s.setValue("nickname", figure->nickname);
+    if (!figure->line_reg.isEmpty())
+        s.setValue("line_reg", figure->line_reg);
+    if (!figure->name_reg.isEmpty())
+        s.setValue("name_reg", figure->name_reg);
     figure->avatar.save(dir.absoluteFilePath("avatar.png"));
     writeTextFile(dir.absoluteFilePath("style_sheet.qss"), figure->qss);
 }

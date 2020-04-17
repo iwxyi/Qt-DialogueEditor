@@ -40,6 +40,8 @@ public:
     void initData();
 
     void setDataDirAndLoad(QString dir);
+    void beginMultiAdd();
+    void endMultiAdd();
     void fromText(QString full);
     QString toText(QList<DialogueBucket *> buckets, QString indent_blank = "　　", QString indent_line = "\n\n");
     QString toText(QString indent_blank = "　　", QString indent_line = "\n\n");
@@ -57,9 +59,6 @@ private:
 protected:
     void resizeEvent(QResizeEvent* event) override;
     void keyPressEvent(QKeyEvent *event) override;
-
-    void beginMultiAdd();
-    void endMultiAdd();
 
 signals:
 
@@ -90,6 +89,7 @@ public slots:
     void actionUpdateFigureDialogues(); // 更新样式 ctrl+u
     void actionUpdateSelectedDialogues(); // 设为模板 ctrl+t
     void actionRenameFigureAndDialogues(); // 重命名 ctrl+r
+    void actionEditFigureLineReg(); // 行匹配 正则
     void actionFigureMoveUp(); // 上移 ctrl+←
     void actionFigureMoveDown(); // 下移 ctrl+→
     void actionFigureDelete(); // 删除 delete

@@ -107,6 +107,36 @@ void DialogueGroup::setDataDirAndLoad(QString dir)
     editor->setDataDir(dir);
 }
 
+void DialogueGroup::beginMultiAdd()
+{
+    _multi_adding = true;
+
+    editor->setBucket(QList<DialogueBucket*>{}, nullptr);
+}
+
+void DialogueGroup::endMultiAdd()
+{
+    _multi_adding = false;
+
+    // 传递信号给editor
+    int row = dialogues_list_widget->currentRow();
+    if (row == -1 || row >= dialogues_list_widget->count())
+    {
+        editor->setBucket(QList<DialogueBucket*>{}, nullptr);
+        return ;
+    }
+    auto bucket = buckets[row];
+    QList<DialogueBucket*> selecteds;
+    for (int i = 0; i < dialogues_list_widget->count(); i++)
+        if (dialogues_list_widget->item(i)->isSelected())
+            selecteds.append(buckets[i]);
+    editor->setBucket(selecteds, bucket);
+}
+
+/**
+ * 从文本导入
+ * 多段导入可使用 beginMultiAdd，提高性能
+ */
 void DialogueGroup::fromText(QString full)
 {
     QStringList paras = full.split("\n", QString::SkipEmptyParts);
@@ -117,10 +147,17 @@ void DialogueGroup::fromText(QString full)
             continue;
         if (para.indexOf("“") == -1 && para.indexOf(":") == -1 && para.indexOf("：") == -1) // 是旁白
         {
+            // 判断有没有人名符合
+
+            // 没有人名符合，是旁白
             addChat(new DialogueBucket(para, this));
         }
-        else // 是语言
+        else // 是说话
         {
+            // 格式1：  小明：“”
+            // 格式2：  “”小明说，“”
+            // 格式3：  “”小明说道。
+
             QString name, said;
             if (para.indexOf("“") != -1)
             {
@@ -336,32 +373,6 @@ void DialogueGroup::keyPressEvent(QKeyEvent *event)
     QWidget::keyPressEvent(event);
 }
 
-void DialogueGroup::beginMultiAdd()
-{
-    _multi_adding = true;
-
-    editor->setBucket(QList<DialogueBucket*>{}, nullptr);
-}
-
-void DialogueGroup::endMultiAdd()
-{
-    _multi_adding = false;
-
-    // 传递信号给editor
-    int row = dialogues_list_widget->currentRow();
-    if (row == -1 || row >= dialogues_list_widget->count())
-    {
-        editor->setBucket(QList<DialogueBucket*>{}, nullptr);
-        return ;
-    }
-    auto bucket = buckets[row];
-    QList<DialogueBucket*> selecteds;
-    for (int i = 0; i < dialogues_list_widget->count(); i++)
-        if (dialogues_list_widget->item(i)->isSelected())
-            selecteds.append(buckets[i]);
-    editor->setBucket(selecteds, bucket);
-}
-
 void DialogueGroup::slotAddLeftChat()
 {
     auto bucket = new DialogueBucket(OppoChat, "名字", QPixmap(":/avatars/girl_1"), "说的话", this);
@@ -465,6 +476,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     QAction* select_all_dialogue_action = new QAction("选中TA的所有对话", this);
     QAction* figure_update_all_action = new QAction("更新TA的对话样式", this);
     QAction* figure_update_select_action = new QAction("将选中对话设为TA", this);
+    QAction* line_reg_action = new QAction("行匹配 表达式", this);
     QAction* figure_rename_action = new QAction("重命名", this);
     QAction* move_up_action = new QAction("上移", this);
     QAction* move_down_action = new QAction("下移", this);
@@ -475,6 +487,8 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     menu->addSeparator();
     menu->addAction(figure_update_all_action);
     menu->addAction(figure_update_select_action);
+    menu->addSeparator();
+    menu->addAction(line_reg_action);
     menu->addAction(figure_rename_action);
     menu->addSeparator();
     menu->addAction(move_up_action);
@@ -486,6 +500,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     connect(select_all_dialogue_action, SIGNAL(triggered()), this, SLOT(actionSelectFigureDialogue()));
     connect(figure_update_all_action, SIGNAL(triggered()), this, SLOT(actionUpdateFigureDialogues()));
     connect(figure_update_select_action, SIGNAL(triggered()), this, SLOT(actionUpdateSelectedDialogues()));
+    connect(line_reg_action, SIGNAL(triggered()), this, SLOT(actionEditFigureLineReg()));
     connect(figure_rename_action, SIGNAL(triggered()), this, SLOT(actionRenameFigureAndDialogues()));
     connect(move_up_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveUp()));
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveDown()));
@@ -959,6 +974,19 @@ void DialogueGroup::actionRenameFigureAndDialogues()
     }
     refreshFigures();
     dialogues_list_widget->setFocus(); // 要 setFocus 才会 实时更新
+}
+
+void DialogueGroup::actionEditFigureLineReg()
+{
+    auto figure = manager->getFigures().at(figure_list_widget->currentRow());
+    QString old_reg = figure->line_reg;
+    bool ok;
+    QString new_reg = QInputDialog::getText(this, "角色行匹配表达式", "匹配该角色的正则表达式，\n若匹配一部分，则\n若匹配整行（例如：^.*名字.*$），则下一行作为TA说的话", QLineEdit::Normal, old_reg, &ok);
+    if (!ok)
+        return ;
+    figure->line_reg = new_reg;
+
+    manager->saveData(figure);
 }
 
 void DialogueGroup::actionFigureMoveUp()
