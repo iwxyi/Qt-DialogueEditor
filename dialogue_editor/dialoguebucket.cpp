@@ -84,6 +84,10 @@ void DialogueBucket::initView(QString name, QPixmap ava, QString said)
     }
     vlayout->addLayout(flayout);
     vlayout->addLayout(blayout);
+
+    QPalette pa(this->palette());
+    pa.setColor(QPalette::Window, Qt::transparent);
+    pa.setColor(QPalette::Background, Qt::transparent);
 }
 
 void DialogueBucket::initView(QString narr)
@@ -200,6 +204,10 @@ void DialogueBucket::mouseMoveEvent(QMouseEvent *event)
     // 横向拖拽是导出
     if ((event->buttons() & Qt::LeftButton) && (event->pos().x() < 0-QApplication::startDragDistance() || event->pos().x() > width() + QApplication::startDragDistance()))
     {
+        if (event->pos().x() < 0)
+            press_pos.setX(0);
+        else if (event->pos().x() > width())
+            press_pos.setX(width());
         emit signalDragOutEvent(mapToGlobal(press_pos));
     }
 

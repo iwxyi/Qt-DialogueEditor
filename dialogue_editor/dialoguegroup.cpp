@@ -822,16 +822,16 @@ void DialogueGroup::slotBucketDragOutEvent(QPoint press_pos)
             total_height += bucket->height();
         }
     }
-    QPixmap pixmap(QSize(dialogues_list_widget->contentsRect().width(), total_height));
+    QPixmap pixmap(QSize(dialogues_list_widget->contentsRect().width()-dialogues_list_widget->verticalScrollBar()->width(), total_height));
     QColor bg_color = dialogues_list_widget->palette().window().color();
-    pixmap.fill(bg_color);
+    pixmap.fill(Qt::white);
 
     // 绘制到图片
     int current_height = 0;
     foreach (auto bucket, selected_buckets)
     {
         bucket->render(&pixmap, QPoint(0, current_height));
-        current_height += bucket->height();
+        current_height += bucket->height()+8;
     }
 
     // 设置 Mime
@@ -850,10 +850,13 @@ void DialogueGroup::slotBucketDragOutEvent(QPoint press_pos)
     mime->setUrls(QList<QUrl>{QUrl::fromLocalFile(path)});
 
     // 开始拖拽
+    QPixmap drag_pixmap(QSize(dialogues_list_widget->contentsRect().width()-dialogues_list_widget->verticalScrollBar()->width(), dialogues_list_widget->contentsRect().height()));
+    dialogues_list_widget->render(&drag_pixmap);
+
     QDrag* drag = new QDrag(this);
     drag->setMimeData(mime);
-    drag->setPixmap(pixmap);
-    drag->setHotSpot(press_pos - QCursor::pos());
+    drag->setPixmap(drag_pixmap);
+    drag->setHotSpot(mapFromGlobal(QCursor::pos()) - dialogues_list_widget->pos());
     connect(drag, &QDrag::destroyed, this, [=](QObject*){
         QTimer::singleShot(10000, [=]{
             QFile file(path);
