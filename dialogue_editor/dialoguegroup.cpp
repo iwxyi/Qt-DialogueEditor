@@ -136,28 +136,58 @@ void DialogueGroup::endMultiAdd()
 /**
  * 从文本导入
  * 多段导入可使用 beginMultiAdd，提高性能
+ *
+ * 格式1：  小明：“”
+ * 格式2：  “”小明说，“”
+ * 格式3：  “”小明说道。
+ * 格式4：  【前缀】小明 2020.2.2  \n  说的话
  */
 void DialogueGroup::fromText(QString full)
 {
     QStringList paras = full.split("\n", QString::SkipEmptyParts);
+    auto figures = manager->getFigures();
+    DialogueFigure* prev_figure = nullptr; // 两段格式的话
     foreach (auto para, paras)
     {
         para = para.trimmed();
         if (para.isEmpty())
             continue;
-        if (para.indexOf("“") == -1 && para.indexOf(":") == -1 && para.indexOf("：") == -1) // 是旁白
+        if (para.indexOf("“") == -1 /*&& para.indexOf(":") == -1*/ && para.indexOf("：") == -1) // 是旁白
         {
+            // 判断是不是上一段的人说的话
+            if (prev_figure)
+            {
+                auto bucket = new DialogueBucket(prev_figure->type, prev_figure->nickname, prev_figure->avatar, para.trimmed(), this);
+                bucket->setStyleSheet(prev_figure->qss);
+                addChat(bucket);
+                prev_figure = nullptr;
+                continue;
+            }
+
             // 判断有没有人名符合
+            foreach (auto figure, figures)
+            {
+                if (figure->line_pattern.isEmpty())
+                    continue;
+
+                if (figure->line_reg.match(para).hasMatch())
+                {
+                    // 找到匹配的人，先保存figure，下一段就是他说的话
+                    prev_figure = figure;
+                    break;
+                }
+            }
 
             // 没有人名符合，是旁白
-            addChat(new DialogueBucket(para, this));
+            if (prev_figure == nullptr)
+            {
+                auto bucket = new DialogueBucket(para, this);
+                bucket->setStyleSheet(DialogueBucket::getDefaultNarratorStyleSheet());
+                addChat(bucket);
+            }
         }
         else // 是说话
         {
-            // 格式1：  小明：“”
-            // 格式2：  “”小明说，“”
-            // 格式3：  “”小明说道。
-
             QString name, said;
             if (para.indexOf("“") != -1)
             {
@@ -979,12 +1009,12 @@ void DialogueGroup::actionRenameFigureAndDialogues()
 void DialogueGroup::actionEditFigureLineReg()
 {
     auto figure = manager->getFigures().at(figure_list_widget->currentRow());
-    QString old_reg = figure->line_reg;
+    QString old_reg = figure->line_pattern;
     bool ok;
     QString new_reg = QInputDialog::getText(this, "角色行匹配表达式", "匹配该角色的正则表达式，\n若匹配一部分，则\n若匹配整行（例如：^.*名字.*$），则下一行作为TA说的话", QLineEdit::Normal, old_reg, &ok);
     if (!ok)
         return ;
-    figure->line_reg = new_reg;
+    figure->line_pattern = new_reg;
 
     manager->saveData(figure);
 }

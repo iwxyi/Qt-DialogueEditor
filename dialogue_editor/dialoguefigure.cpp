@@ -9,3 +9,8 @@ bool DialogueFigure::isNarrator()
 {
     return type == NarrChat;
 }
+
+void DialogueFigure::setLineReg(QString s)
+{
+    line_reg.setPattern(s);
+}

@@ -39,8 +39,9 @@ void DialogueManager::loadData()
                      QPixmap(dir.absoluteFilePath("avatar.png")),
                      readTextFile(dir.absoluteFilePath("style_sheet.qss")),
                      sts.value("id").toString());
-        figure->line_reg = sts.value("line_reg", "").toString();
-        figure->name_reg = sts.value("name_reg", "").toString();
+        figure->line_pattern = sts.value("line_pattern", "").toString();
+        figure->name_pattern = sts.value("name_pattern", "").toString();
+        figure->setLineReg(figure->line_pattern);
     }
 }
 
@@ -56,10 +57,10 @@ void DialogueManager::saveData(DialogueFigure *figure)
     s.setValue("id", figure->figure_id);
     s.setValue("type", (int)figure->type);
     s.setValue("nickname", figure->nickname);
-    if (!figure->line_reg.isEmpty())
-        s.setValue("line_reg", figure->line_reg);
-    if (!figure->name_reg.isEmpty())
-        s.setValue("name_reg", figure->name_reg);
+    if (!figure->line_pattern.isEmpty())
+        s.setValue("line_pattern", figure->line_pattern);
+    if (!figure->name_pattern.isEmpty())
+        s.setValue("name_pattern", figure->name_pattern);
     figure->avatar.save(dir.absoluteFilePath("avatar.png"));
     writeTextFile(dir.absoluteFilePath("style_sheet.qss"), figure->qss);
 }
