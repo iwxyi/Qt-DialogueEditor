@@ -651,7 +651,8 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     QAction* select_all_dialogue_action = new QAction("选中TA的所有对话", this);
     QAction* figure_update_all_action = new QAction("更新TA的对话样式", this);
     QAction* figure_update_select_action = new QAction("将选中对话设为TA", this);
-    QAction* line_reg_action = new QAction("行匹配 表达式", this);
+    QAction* name_reg_action = new QAction("名字匹配 表达式", this);
+    QAction* line_reg_action = new QAction("整行匹配 表达式", this);
     QAction* figure_rename_action = new QAction("重命名", this);
     QAction* move_up_action = new QAction("上移", this);
     QAction* move_down_action = new QAction("下移", this);
@@ -663,6 +664,7 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     menu->addAction(figure_update_all_action);
     menu->addAction(figure_update_select_action);
     menu->addSeparator();
+    menu->addAction(name_reg_action);
     menu->addAction(line_reg_action);
     menu->addAction(figure_rename_action);
     menu->addSeparator();
@@ -675,7 +677,8 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
     connect(select_all_dialogue_action, SIGNAL(triggered()), this, SLOT(actionSelectFigureDialogue()));
     connect(figure_update_all_action, SIGNAL(triggered()), this, SLOT(actionUpdateFigureDialogues()));
     connect(figure_update_select_action, SIGNAL(triggered()), this, SLOT(actionUpdateSelectedDialogues()));
-    connect(line_reg_action, SIGNAL(triggered()), this, SLOT(actionEditFigureLineReg()));
+    connect(name_reg_action, SIGNAL(triggered()), this, SLOT(actionEditFigureLineReg()));
+    connect(line_reg_action, SIGNAL(triggered()), this, SLOT(actionEditFigureNameReg()));
     connect(figure_rename_action, SIGNAL(triggered()), this, SLOT(actionRenameFigureAndDialogues()));
     connect(move_up_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveUp()));
     connect(move_down_action, SIGNAL(triggered()), this, SLOT(actionFigureMoveDown()));
@@ -688,6 +691,8 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
         figure_update_all_action->setEnabled(false);
         figure_update_select_action->setEnabled(false);
         figure_rename_action->setEnabled(false);
+        name_reg_action->setEnabled(false);
+        line_reg_action->setEnabled(false);
         move_up_action->setEnabled(false);
         move_down_action->setEnabled(false);
         delete_action->setEnabled(false);
@@ -697,6 +702,8 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
         insert_dialogue_action->setEnabled(false);
         figure_update_select_action->setEnabled(false);
         figure_rename_action->setEnabled(false);
+        name_reg_action->setEnabled(false);
+        line_reg_action->setEnabled(false);
     }
     else // 单选
     {
@@ -704,6 +711,8 @@ void DialogueGroup::slotFigureMenuShowed(QPoint pos)
         if (figure->isNarrator()) // 是旁白
         {
             figure_rename_action->setEnabled(false);
+            line_reg_action->setEnabled(false);
+            name_reg_action->setEnabled(false);
         }
     }
 
@@ -928,7 +937,7 @@ void DialogueGroup::actionInsertRightChat(bool next)
 void DialogueGroup::actionRenameChatNickname()
 {
     auto bucket = buckets.at(dialogues_list_widget->currentRow());
-    if (bucket->isNarrator())
+    if (bucket == nullptr || bucket->isNarrator())
         return ;
     QString old_name = bucket->getName();
 
@@ -958,17 +967,16 @@ void DialogueGroup::actionRenameChatNickname()
 
 void DialogueGroup::actionCopyChat()
 {
-    auto items = dialogues_list_widget->selectedItems();
     QList<DialogueBucket*>widgets;
-    for (int i = 0; i < items.size(); i++)
+    for (int i = 0; i < dialogues_list_widget->count(); i++)
     {
-        int row = dialogues_list_widget->row(items.at(i));
-        if (row < 0)
+        if (!dialogues_list_widget->item(i)->isSelected())
             continue;
-        auto widget = buckets.at(row);
+        auto widget = buckets.at(i);
         widgets.append(widget);
     }
-    QApplication::clipboard()->setText(toText(widgets));
+    if (widgets.size())
+        QApplication::clipboard()->setText(toText(widgets));
 }
 
 void DialogueGroup::actionPasteChat()
@@ -1213,12 +1221,25 @@ void DialogueGroup::actionRenameFigureAndDialogues()
     dialogues_list_widget->setFocus(); // 要 setFocus 才会 实时更新
 }
 
+void DialogueGroup::actionEditFigureNameReg()
+{
+    auto figure = manager->getFigures().at(figure_list_widget->currentRow());
+    QString old_reg = figure->line_pattern;
+    bool ok;
+    QString new_reg = QInputDialog::getText(this, "角色匹配表达式", "匹配该角色的正则表达式\n含双引号的段落中出现时，本段作为TA说的话", QLineEdit::Normal, old_reg, &ok);
+    if (!ok)
+        return ;
+    figure->setNameReg(new_reg);
+
+    manager->saveData(figure);
+}
+
 void DialogueGroup::actionEditFigureLineReg()
 {
     auto figure = manager->getFigures().at(figure_list_widget->currentRow());
     QString old_reg = figure->line_pattern;
     bool ok;
-    QString new_reg = QInputDialog::getText(this, "角色行匹配表达式", "匹配该角色的正则表达式，\n若匹配一部分，则\n若匹配整行（例如：^.*名字.*$），则下一行作为TA说的话", QLineEdit::Normal, old_reg, &ok);
+    QString new_reg = QInputDialog::getText(this, "角色行匹配表达式", "匹配该角色的正则表达式\n不含双引号的段落中出现时，下一行作为TA说的话\n可用来从 QQ/微信/TIM 中粘贴消息", QLineEdit::Normal, old_reg, &ok);
     if (!ok)
         return ;
     figure->setLineReg(new_reg);

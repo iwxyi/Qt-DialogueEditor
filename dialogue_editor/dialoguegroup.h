@@ -95,6 +95,7 @@ public slots:
     void actionUpdateFigureDialogues(); // 更新样式 ctrl+u
     void actionUpdateSelectedDialogues(); // 设为模板 ctrl+t
     void actionRenameFigureAndDialogues(); // 重命名 ctrl+r
+    void actionEditFigureNameReg();
     void actionEditFigureLineReg(); // 行匹配 正则
     void actionFigureMoveUp(); // 上移 ctrl+←
     void actionFigureMoveDown(); // 下移 ctrl+→

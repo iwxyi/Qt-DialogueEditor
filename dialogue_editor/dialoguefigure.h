@@ -13,6 +13,7 @@ public:
     DialogueFigure(QObject *parent = nullptr);
 
     bool isNarrator();
+    void setNameReg(QString s);
     void setLineReg(QString s);
 
 public:
