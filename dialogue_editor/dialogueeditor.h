@@ -15,6 +15,7 @@
 #include <QTimer>
 #include <QFileDialog>
 #include <QSettings>
+#include <QPainter>
 #include "dialoguebucket.h"
 #include "qsshighlighteditor.h"
 
@@ -47,6 +48,7 @@ private:
     QList<DialogueBucket*> selected_buckets; // 选中（包括正在编辑）的bucket
 
     QPushButton *avatar_btn;
+    QPushButton *circle_btn, *rounded_btn;
     QLabel *name_label, *said_label, *style_label;
     QPlainTextEdit *said_edit;
     QSSHighlightEditor *style_edit;

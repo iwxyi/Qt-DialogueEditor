@@ -46,7 +46,7 @@ void DialogueGroup::initView()
     dialogues_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     figure_list_widget->setContextMenuPolicy(Qt::CustomContextMenu);
     figure_list_widget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    figure_list_widget->setToolTip("角色模板，双击(ctrl+数字)插入该角色至对话框\n通过最右边“保存角色”创建");
+    figure_list_widget->setToolTip("角色模板\n【双】击或【ctrl+数字】添加至对话框\n通过最右边“保存角色”创建");
 
     connect(left_button, SIGNAL(clicked()), this, SLOT(slotAddLeftChat()));
     connect(mid_button, SIGNAL(clicked()), this, SLOT(slotAddNarrator()));

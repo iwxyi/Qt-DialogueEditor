@@ -24,6 +24,14 @@ void DialogueEditor::initView()
 
     QVBoxLayout *vlayout = new QVBoxLayout(this);
     vlayout->addWidget(avatar_btn);
+    {
+        circle_btn = new QPushButton("圆形头像", this);
+        rounded_btn = new QPushButton("圆角头像", this);
+        QHBoxLayout* avatar_hlayout = new QHBoxLayout;
+        avatar_hlayout->addWidget(circle_btn);
+        avatar_hlayout->addWidget(rounded_btn);
+        vlayout->addLayout(avatar_hlayout);
+    }
     vlayout->addWidget(name_label);
     vlayout->addWidget(name_edit);
     vlayout->addWidget(said_label);
@@ -40,6 +48,8 @@ void DialogueEditor::initView()
     vlayout->setMargin(0);
 
     connect(avatar_btn, &QPushButton::clicked, this, [=]{
+        if (!current_bucket || _loading_bucket)
+            return ;
         QSettings st(QDir(data_dir).absoluteFilePath("settings.ini"), QSettings::IniFormat, this);
         QString r = st.value("recent/avatar_path", "").toString();
 
@@ -48,6 +58,71 @@ void DialogueEditor::initView()
             return ;
         st.setValue("recent/avatar_path", path);
         QPixmap pixmap(path);
+        avatar_btn->setIconSize(getAvatarSize(pixmap.size()));
+        avatar_btn->setIcon(pixmap);
+        foreach (auto bucket, selected_buckets)
+            bucket->setAvatar(pixmap);
+    });
+    connect(circle_btn, &QPushButton::clicked, this, [=]{
+        if (!current_bucket || _loading_bucket)
+            return ;
+        QSettings st(QDir(data_dir).absoluteFilePath("settings.ini"), QSettings::IniFormat, this);
+        QString r = st.value("recent/avatar_path", "").toString();
+
+        QString path = QFileDialog::getOpenFileName(this, "选择头像", r, tr("Images (*.png *.xpm *.jpg)"));
+        if (path.isEmpty())
+            return ;
+        st.setValue("recent/avatar_path", path);
+        QPixmap pixmap(path);
+        // 转成圆形
+        {
+            int radius = qMin(pixmap.width(), pixmap.height()) / 2;
+            QPoint center(pixmap.width()/2, pixmap.height()/2);
+            QRect usedRect(center.x()-radius, center.y()-radius, radius*2, radius*2);
+
+            // 新图片
+            QPixmap newPixmap(radius*2, radius*2);
+            newPixmap.fill(Qt::transparent);
+            QPainter painter(&newPixmap);
+            QPainterPath path;
+            path.addEllipse(0, 0, radius*2, radius*2);
+            painter.setClipPath(path, Qt::IntersectClip);
+            painter.drawPixmap(QRect(0,0,radius*2,radius*2), pixmap, usedRect);
+            pixmap = newPixmap;
+        }
+        avatar_btn->setIconSize(getAvatarSize(pixmap.size()));
+        avatar_btn->setIcon(pixmap);
+        foreach (auto bucket, selected_buckets)
+            bucket->setAvatar(pixmap);
+    });
+    connect(rounded_btn, &QPushButton::clicked, this, [=]{
+        if (!current_bucket || _loading_bucket)
+            return ;
+        QSettings st(QDir(data_dir).absoluteFilePath("settings.ini"), QSettings::IniFormat, this);
+        QString r = st.value("recent/avatar_path", "").toString();
+
+        QString path = QFileDialog::getOpenFileName(this, "选择头像", r, tr("Images (*.png *.xpm *.jpg)"));
+        if (path.isEmpty())
+            return ;
+        st.setValue("recent/avatar_path", path);
+        QPixmap pixmap(path);
+        // 转成圆角
+        {
+            int radius = qMin(pixmap.width(), pixmap.height()) / 2;
+            QPoint center(pixmap.width()/2, pixmap.height()/2);
+            QRect usedRect(center.x()-radius, center.y()-radius, radius*2, radius*2);
+
+            // 新图片
+            QPixmap newPixmap(radius*2, radius*2);
+            newPixmap.fill(Qt::transparent);
+            QPainter painter(&newPixmap);
+            QPainterPath path;
+            int cor = radius / 6;
+            path.addRoundedRect(0, 0, radius*2, radius*2, cor, cor);
+            painter.setClipPath(path, Qt::IntersectClip);
+            painter.drawPixmap(QRect(0,0,radius*2,radius*2), pixmap, usedRect);
+            pixmap = newPixmap;
+        }
         avatar_btn->setIconSize(getAvatarSize(pixmap.size()));
         avatar_btn->setIcon(pixmap);
         foreach (auto bucket, selected_buckets)
@@ -107,6 +182,9 @@ void DialogueEditor::setBucket(QList<DialogueBucket *> buckets, DialogueBucket *
     current_bucket = bucket;
     if (bucket == nullptr)
     {
+        avatar_btn->setEnabled(false);
+        circle_btn->setEnabled(false);
+        rounded_btn->setEnabled(false);
         name_label->setEnabled(false);
         name_edit->setEnabled(false);
         said_label->setEnabled(false);
@@ -122,6 +200,9 @@ void DialogueEditor::setBucket(QList<DialogueBucket *> buckets, DialogueBucket *
     style_edit->setPlainText(bucket->styleSheet());
     if (bucket->isNarrator())
     {
+        avatar_btn->setEnabled(false);
+        circle_btn->setEnabled(false);
+        rounded_btn->setEnabled(false);
         name_label->setEnabled(false);
         name_edit->setEnabled(false);
         said_label->setEnabled(true);
@@ -136,6 +217,9 @@ void DialogueEditor::setBucket(QList<DialogueBucket *> buckets, DialogueBucket *
     }
     else
     {
+        avatar_btn->setEnabled(true);
+        circle_btn->setEnabled(true);
+        rounded_btn->setEnabled(true);
         name_label->setEnabled(true);
         name_edit->setEnabled(true);
         said_label->setEnabled(true);
