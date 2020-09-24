@@ -77,7 +77,7 @@ void DialogueGroup::initView()
     });
     connect(dialogues_list_widget, &QListWidget::doubleClicked, this, [=](const QModelIndex& index) {
         // int row = index.row(); // 不用确定行数，肯定已经是当前行了
-        editor->focusSaid();
+        actionEditSaid();
     });
     connect(dialogues_list_widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotDialogueMenuShowed(QPoint)));
 
@@ -89,7 +89,7 @@ void DialogueGroup::initView()
         auto figure = manager->getFigures().at(row);
         slotInsertFromFigure(figure);
         if (dialogues_list_widget->selectedItems().size() == 1)
-            editor->focusSaid();
+            actionEditSaid();
         else
             dialogues_list_widget->setFocus();
     });
@@ -448,6 +448,8 @@ void DialogueGroup::keyPressEvent(QKeyEvent *event)
         return actionChatMoveDown();
     else if (inDlg && sc(nullptr, Qt::Key_Delete))
         return actionChatDelete();
+    else if (inDlg && sc(alt, Qt::Key_S))
+        return actionEditSaid();
     else if (inFgr && sc(nullptr, Qt::Key_Enter))
         return actionInsertFigureDialogue();
     else if (inFgr && sc(nullptr, Qt::Key_Return))
@@ -911,7 +913,7 @@ void DialogueGroup::actionInsertLeftChat(bool next)
                               DialogueBucket::getDefaultChatStyleSheet(), next);
     }
     if (items.size() == 1)
-        editor->focusSaid();
+        actionEditSaid();
     endMultiAdd();
 }
 
@@ -928,7 +930,7 @@ void DialogueGroup::actionInsertNarrator(bool next)
                               DialogueBucket::getDefaultNarratorStyleSheet(), next);
     }
     if (items.size() == 1)
-        editor->focusSaid();
+        actionEditSaid();
     endMultiAdd();
 }
 
@@ -947,7 +949,7 @@ void DialogueGroup::actionInsertRightChat(bool next)
                               DialogueBucket::getDefaultChatStyleSheet(), next);
     }
     if (items.size() == 1)
-        editor->focusSaid();
+        actionEditSaid();
     endMultiAdd();
 }
 
@@ -1082,6 +1084,11 @@ void DialogueGroup::actionChatDelete()
         delete item;
         delete widget;
     }
+}
+
+void DialogueGroup::actionEditSaid()
+{
+    editor->focusSaid();
 }
 
 void DialogueGroup::actionInsertFigureDialogue()
@@ -1352,6 +1359,8 @@ void DialogueGroup::actionFigureDelete()
         if (row < 0)
             continue;
         manager->deleteFigure(figures.at(row));
+        figure_list_widget->takeItem(figure_list_widget->row(items.at(i)));
+        items.removeAt(i--);
     }
     manager->saveOrder();
     refreshFigures();
@@ -1362,7 +1371,7 @@ void DialogueGroup::actionInsertFigureDialogueByIndex(int index)
     if (index < 0 || index >= manager->getFigures().size())
         return ;
     slotInsertFromFigure(manager->getFigures().at(index));
-    editor->focusSaid();
+    actionEditSaid();
 }
 
 void DialogueGroup::slotSaveToFile()

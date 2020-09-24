@@ -88,6 +88,7 @@ public slots:
     void actionChatMoveUp();  // 上移 ctrl+←
     void actionChatMoveDown(); // 下移 ctrl+→
     void actionChatDelete(); // 删除 delete
+    void actionEditSaid();
 
     // ==== 角色模板菜单 ====
     void actionInsertFigureDialogue(); // 插入到对话 空格 / ins
