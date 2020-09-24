@@ -1200,10 +1200,13 @@ void DialogueGroup::actionUpdateSelectedDialogues()
 {
     auto figure = manager->getFigures().at(figure_list_widget->currentRow());
     auto items = dialogues_list_widget->selectedItems();
+    bool narra = figure->isNarrator();
     foreach (auto item, items)
     {
         int row = dialogues_list_widget->row(item);
         auto bucket = buckets.at(row);
+        if (bucket->isNarrator() != narra)
+            continue;
         bucket->setName(figure->nickname);
         bucket->setAvatar(figure->avatar);
         bucket->setStyleSheet(figure->qss);
