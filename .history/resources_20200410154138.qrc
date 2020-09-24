@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/avatars">
+        <file alias="boy_1">resources/avatars/boy_1.png</file>
+        <file>resources/avatars/boy_2.png</file>
+        <file>resources/avatars/boy_3.png</file>
+        <file>resources/avatars/boy_4.png</file>
+        <file>resources/avatars/boy_5.png</file>
+        <file>resources/avatars/boy_6.png</file>
+        <file>resources/avatars/girl_1.png</file>
+        <file>resources/avatars/girl_2.png</file>
+        <file>resources/avatars/girl_3.png</file>
+        <file>resources/avatars/girl_4.png</file>
+        <file>resources/avatars/girl_5.png</file>
+        <file>resources/avatars/girl_6.png</file>
+        <file>resources/avatars/girl_7.png</file>
+        <file>resources/avatars/girl_8.png</file>
+        <file>resources/avatars/girl_9.png</file>
+        <file>resources/avatars/girl_10.png</file>
+        <file>resources/avatars/girl_11.png</file>
+    </qresource>
+</RCC>

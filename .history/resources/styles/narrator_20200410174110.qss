@@ -1,0 +1,6 @@
+#DialogueNarrator {
+    border: none;
+    border-radius: 5px;
+    background: #eeeeee;
+    padding: 10px;
+}
